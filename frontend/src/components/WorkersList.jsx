@@ -1,7 +1,6 @@
 // frontend/WorkersList.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import html2pdf from 'html2pdf.js';
 import { API_BASE } from '../api';
 
 export default function WorkersList() {
@@ -86,47 +85,40 @@ export default function WorkersList() {
   };
 
   const handleViewResume = async (worker) => {
-    // if worker has uploaded PDF, download it
+    let pdfUrl;
+
+    // if worker has uploaded PDF, use it
     if (worker.uploadedPdfUrl) {
-      const link = document.createElement('a');
-      link.href = worker.uploadedPdfUrl.startsWith('http') ? worker.uploadedPdfUrl : `${API_BASE}${worker.uploadedPdfUrl}`;
-      link.download = `worker_${worker.name || worker._id}_resume.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      return;
+      pdfUrl = worker.uploadedPdfUrl;
+    } else {
+      // fallback: generate PDF on the server
+      try {
+        const res = await fetch(
+          `${API_BASE}/api/workers/${worker._id}/generate-pdf`,
+          { method: 'POST' }
+        );
+        const data = await res.json();
+
+        if (data.pdfUrl) {
+          pdfUrl = data.pdfUrl;
+        } else {
+          alert('Resume generation failed');
+          return;
+        }
+      } catch (err) {
+        console.error('Resume error:', err);
+        alert('Error generating resume');
+        return;
+      }
     }
 
-    // Generate PDF on client-side
-    try {
-      const element = document.createElement('div');
-      element.innerHTML = `
-        <div style="padding: 20px; font-family: Arial, sans-serif;">
-          <h1>${worker.name}</h1>
-          <p><strong>Phone:</strong> ${worker.phone}</p>
-          <p><strong>Location:</strong> ${worker.cityArea || 'N/A'}</p>
-          <p><strong>Skills:</strong> ${worker.skills?.join(', ') || 'N/A'}</p>
-          <p><strong>Experience:</strong> ${worker.yearsOfExperience || 0} years</p>
-          <p><strong>Verification:</strong> ${worker.isVerified ? '✅ Verified' : '❌ Not Verified'}</p>
-          <p><strong>Trust Score:</strong> ${worker.trustScore || 0}%</p>
-          <hr>
-          <p><strong>About:</strong> ${worker.bio || 'N/A'}</p>
-        </div>
-      `;
-
-      const opt = {
-        margin: 10,
-        filename: `worker_${worker.name || worker._id}_resume.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-      };
-
-      await html2pdf().set(opt).from(element).save();
-    } catch (err) {
-      console.error('Resume error:', err);
-      alert('Error generating resume');
-    }
+    // Download the PDF
+    const link = document.createElement('a');
+    link.href = `${API_BASE}${pdfUrl}`;
+    link.download = `worker_${worker.name || worker._id}_resume.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (

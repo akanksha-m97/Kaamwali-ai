@@ -1,7 +1,6 @@
 // components/WorkerProfile.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import html2pdf from 'html2pdf.js';
 import SharePoster from './SharePoster';
 import { API_BASE } from '../api';
 
@@ -26,37 +25,27 @@ const WorkerProfile = ({ worker: initialWorker, onBack }) => {
     return;
   }
 
-  try {
-    // Create resume HTML
-    const element = document.createElement('div');
-    element.innerHTML = `
-      <div style="padding: 20px; font-family: Arial, sans-serif;">
-        <h1>${worker.name}</h1>
-        <p><strong>Phone:</strong> ${worker.phone}</p>
-        <p><strong>Location:</strong> ${worker.cityArea || 'N/A'}</p>
-        <p><strong>Skills:</strong> ${worker.skills?.join(', ') || 'N/A'}</p>
-        <p><strong>Experience:</strong> ${worker.yearsOfExperience || 0} years</p>
-        <p><strong>Verification:</strong> ${worker.isVerified ? '✅ Verified' : '❌ Not Verified'}</p>
-        <p><strong>Trust Score:</strong> ${worker.trustScore || 0}%</p>
-        <hr>
-        <p><strong>About:</strong> ${worker.bio || 'N/A'}</p>
-      </div>
-    `;
+  const res = await fetch(
+    `${API_BASE}/api/workers/${worker._id}/generate-pdf`,
+    { method: "POST" }
+  );
 
-    // Generate PDF
-    const opt = {
-      margin: 10,
-      filename: `worker_${worker._id}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-    };
-
-    await html2pdf().set(opt).from(element).save();
-  } catch (err) {
-    console.error('PDF generation failed', err);
+  if (!res.ok) {
     alert("PDF generation failed");
+    return;
   }
+
+  const data = await res.json();
+  const url = `${API_BASE}${data.pdfUrl}`;
+
+  // ✅ THIS PART WAS MISSING
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `worker_${worker._id}.pdf`;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 
 const handlePDFUpload = async (e) => {
