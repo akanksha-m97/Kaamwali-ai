@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import html2pdf from 'html2pdf.js';
 import { API_BASE } from '../api';
 
 const SharePoster = ({ worker }) => {
   const [pdfUrl, setPdfUrl] = useState('');
   const workerId = worker?._id || worker?.id;
 
-  // Generate PDF and share
+  // Generate PDF and share (client-side)
   const handleGenerateAndSharePDF = async () => {
     if (!workerId) {
       alert('Worker ID missing');
@@ -13,23 +14,35 @@ const SharePoster = ({ worker }) => {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/api/workers/${workerId}/generate-pdf`, {
-        method: 'POST',
-      });
+      // Create resume HTML
+      const element = document.createElement('div');
+      element.innerHTML = `
+        <div style="padding: 20px; font-family: Arial, sans-serif;">
+          <h1>${worker.name}</h1>
+          <p><strong>Phone:</strong> ${worker.phone}</p>
+          <p><strong>Location:</strong> ${worker.cityArea || 'N/A'}</p>
+          <p><strong>Skills:</strong> ${worker.skills?.join(', ') || 'N/A'}</p>
+          <p><strong>Experience:</strong> ${worker.yearsOfExperience || 0} years</p>
+          <p><strong>Verification:</strong> ${worker.isVerified ? '✅ Verified' : '❌ Not Verified'}</p>
+          <p><strong>Trust Score:</strong> ${worker.trustScore || 0}%</p>
+          <hr>
+          <p><strong>About:</strong> ${worker.bio || 'N/A'}</p>
+        </div>
+      `;
 
-      if (!res.ok) throw new Error('PDF generation failed');
+      // Generate PDF
+      const opt = {
+        margin: 10,
+        filename: `worker_${workerId}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+      };
 
-      const data = await res.json();
-      const url = data.pdfUrl.startsWith('http') ? data.pdfUrl : `${API_BASE}${data.pdfUrl}`;
+      await html2pdf().set(opt).from(element).save();
 
-      // 1️⃣ Save PDF URL in state for download button
-      setPdfUrl(url);
-
-      // 2️⃣ Open PDF in new tab
-      window.open(url, '_blank');
-
-      // 3️⃣ Share on WhatsApp
-      const message = `📄 KaamWali.AI – Worker Profile\n\n${url}`;
+      // Share on WhatsApp
+      const message = `📄 KaamWali.AI – Worker Profile for ${worker.name}`;
       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
     } catch (err) {
       console.error('PDF generation failed', err);
