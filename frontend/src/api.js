@@ -4,7 +4,7 @@
 export const API_BASE =
   window.location.hostname === "localhost"
     ? "http://localhost:4000"
-    : "https://kaamwali-ai-backend.onrender.com";
+    : "https://kaamwali-1.onrender.com";
 
 // Metrics (you can make this hit your backend or just stub it)
 export async function getMetrics() {
@@ -14,6 +14,7 @@ export async function getMetrics() {
     return {
       workersCount: (data.workers || []).length,
       employersCount: 0,
+
     };
   } catch {
     return { workersCount: 0, employersCount: 0 };
