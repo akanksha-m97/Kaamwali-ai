@@ -1,13 +1,9 @@
 // src/components/WorkerDashboard.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMetrics } from '../api';
+import { API_BASE, getMetrics } from '../api';
 import { useLanguage } from '../contexts/LanguageContext';
-
-const API_BASE =
-  window.location.hostname === 'localhost'
-    ? 'http://localhost:4000'
-    : 'https://kaamwali-ai-backend.onrender.com';
+import kaamImage from '../assets/images/kaam.jpg';
 
 const WorkerDashboard = () => {
   const navigate = useNavigate();
@@ -211,7 +207,7 @@ const WorkerDashboard = () => {
         .wd-nav-link:hover { background:#f0fdf4; color:#16a34a; }
         .wd-nav-cta { background:#16a34a; color:#fff; border:none; font-size:14px; font-weight:600; padding:9px 20px; border-radius:8px; cursor:pointer; transition:all 0.15s; }
         .wd-nav-cta:hover { background:#15803d; transform:translateY(-1px); }
-        .wd-hero { position:relative; display:flex; align-items:center; justify-content:space-between; gap:48px; padding:40px 48px 48px; background:linear-gradient(rgba(22,43,34,0.55), rgba(22,43,34,0.55)), url('/src/assets/images/kaam.jpg') center/cover no-repeat; overflow:hidden; min-height:360px; }
+        .wd-hero { position:relative; display:flex; align-items:center; justify-content:space-between; gap:48px; padding:40px 48px 48px; background:linear-gradient(rgba(22,43,34,0.55), rgba(22,43,34,0.55)), url('${kaamImage}') center/cover no-repeat; overflow:hidden; min-height:360px; }
         .wd-hero-left { position:relative; max-width:520px; z-index:1; }
         .wd-hero-eyebrow { display:inline-flex; align-items:center; gap:6px; background:rgba(22,163,74,0.25); color:#86efac; font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:4px 12px; border-radius:999px; margin-bottom:16px; }
         .wd-hero-title { font-size:clamp(28px,4vw,42px); font-weight:800; line-height:1.18; color:#fff; margin-bottom:16px; letter-spacing:-0.5px; }

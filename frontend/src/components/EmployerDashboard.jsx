@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getMetrics } from '../api';
 import { API_BASE } from '../api';
 import { useLanguage } from '../contexts/LanguageContext';
+import kaamImage from '../assets/images/kaam.jpg';
 
 /* ─── Design tokens — teal/green palette matching screenshot ── */
 const C = {
@@ -374,7 +375,7 @@ const EmployerDashboard = () => {
       <section style={{
         background: `
   linear-gradient(rgba(22,43,34,0.55), rgba(22,43,34,0.55)),
-  url('/src/assets/images/kaam.jpg') center/cover no-repeat
+  url('${kaamImage}') center/cover no-repeat
  `,
         position: 'relative', overflow: 'hidden',
       }}>

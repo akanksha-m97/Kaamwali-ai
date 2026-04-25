@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { API_BASE } from '../api';
 import { sendOtp as firebaseSendOtp, verifyOtp as firebaseVerifyOtp } from '../firebaseAuth';
+import authImage from '../assets/images/auth.jpeg';
 
 const initialFormData = {
   name: '',
@@ -719,7 +720,7 @@ const AuthPage = ({ onAuthSuccess }) => {
         <div className="kw-auth-right">
           <div className="kw-image-wrapper">
             <img
-              src="/src/assets/images/auth.jpeg"
+              src={authImage}
               alt="KaamWali.AI"
               className="kw-image"
             />

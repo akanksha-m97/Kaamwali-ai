@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SharePoster from './SharePoster';
-import { API_BASE } from '../api';
+import { API_BASE, resolveMediaUrl } from '../api';
 
 const WorkerProfile = ({ worker: initialWorker, onBack }) => {
   const navigate = useNavigate();
@@ -18,6 +18,7 @@ const WorkerProfile = ({ worker: initialWorker, onBack }) => {
   const lastUpdated =
     worker.reliabilitySignals?.lastUpdated &&
     new Date(worker.reliabilitySignals.lastUpdated).toLocaleDateString();
+  const photoUrl = resolveMediaUrl(worker.photoUrl);
 
  const generatePdf = async () => {
   if (!worker?._id) {
@@ -116,8 +117,8 @@ const handlePDFUpload = async (e) => {
         <div className="profile-header">
           {/* Profile photo / avatar */}
           <div className="profile-photo">
-            {worker.photoUrl ? (
-              <img src={worker.photoUrl} alt={worker.name} />
+            {photoUrl ? (
+              <img src={photoUrl} alt={worker.name} />
             ) : (
               <div className="profile-avatar-placeholder">
                 {worker.name?.[0] || 'W'}

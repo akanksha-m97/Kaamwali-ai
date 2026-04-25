@@ -6,6 +6,14 @@ export const API_BASE =
     ? "http://localhost:4000"
     : "https://kaamwali-1.onrender.com";
 
+export function resolveMediaUrl(url) {
+  if (!url) return "";
+  if (/^(https?:)?\/\//i.test(url) || url.startsWith("data:") || url.startsWith("blob:")) {
+    return url;
+  }
+  return `${API_BASE}${url.startsWith("/") ? url : `/${url}`}`;
+}
+
 // Metrics (you can make this hit your backend or just stub it)
 export async function getMetrics() {
   try {
