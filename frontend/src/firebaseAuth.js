@@ -5,8 +5,10 @@ export const sendOtp = async (phone) => {
 
   console.log("🔥 DEV OTP:", otp);
 
-  return import.meta.env.DEV ? otp : true;
+  // Always return the OTP for auto-fill (both dev and production)
+  return otp;
 };
+
 export const verifyOtp = async (otp) => {
   if (otp === String(window.devOtp)) {
     return { success: true };

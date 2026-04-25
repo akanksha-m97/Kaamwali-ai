@@ -55,8 +55,12 @@ const AuthPage = ({ onAuthSuccess }) => {
     try {
       const otp = await firebaseSendOtp(formData.phone);
       setDevOtp(isDevMode && otp ? String(otp) : '');
+
+      // Auto-fill OTP in the form
+      setFormData((prev) => ({ ...prev, otp: String(otp) }));
+
       setSignupStep('otp');
-      setStatusMessage('OTP sent to your phone');
+      setStatusMessage('OTP sent to your phone (check console for auto-filled OTP)');
     } catch (err) {
       setStatusMessage(err.message || 'Failed to send OTP');
     }
