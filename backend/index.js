@@ -824,13 +824,45 @@ function validateRatings(ratings) {
 
 // Compute sentiment from free-text review (improvementSuggestions)
 function computeSentimentScore(text) {
-  if (!text || !text.trim()) return 0.5;
-  const result = sentiment.analyze(text); // [web:43]
-  const maxPossible = 10;
-  let normalized = result.score / maxPossible;
-  if (normalized > 1) normalized = 1;
-  if (normalized < -1) normalized = -1;
-  return (normalized + 1) / 2;
+  // Empty text → neutral
+  if (!text || !text.trim()) return 0;
+
+  const lower = text.toLowerCase();
+
+  // 🔴 Negative words
+  const negativeWords = [
+    "bad", "worst", "stupid", "lazy", "poor", "rude",
+    "late", "careless", "useless", "annoy", "not good",
+    "terrible", "horrible"
+  ];
+
+  // 🟢 Positive words
+  const positiveWords = [
+    "good", "great", "excellent", "hardworking",
+    "polite", "professional", "nice", "amazing",
+    "dedicated", "responsible"
+  ];
+
+  let score = 0;
+
+  // Count negative words
+  negativeWords.forEach(word => {
+    if (lower.includes(word)) score -= 1;
+  });
+
+  // Count positive words
+  positiveWords.forEach(word => {
+    if (lower.includes(word)) score += 1;
+  });
+
+  // Normalize score to range [-1, 1]
+  if (score > 0) {
+    return Math.min(score / positiveWords.length, 1);
+  } else if (score < 0) {
+    return Math.max(score / negativeWords.length, -1);
+  }
+
+  return 0; // neutral
 }
 
 // Recompute Trust Score for a single worker document
@@ -842,11 +874,12 @@ async function recomputeWorkerTrust(workerId) {
 
   // Grace period: ignore workers updated < 5 minutes ago
   if (worker.updatedAt && Date.now() - new Date(worker.updatedAt).getTime() < 5 * 60 * 1000) {
-    return; // recent enough, skip
+    return;
   }
 
-  const feedbacks = worker.feedbacks || [];
+  const feedbacks = Array.isArray(worker.feedbacks) ? worker.feedbacks : [];
   const n = feedbacks.length;
+  const now = Date.now();
 
   if (n === 0) {
     await workersCollection.updateOne(
@@ -856,10 +889,13 @@ async function recomputeWorkerTrust(workerId) {
           trustScore: 0,
           trustMeta: {
             avgRating: 0,
-            sentimentScore01: 0.5,
+            avgSentiment: 0,
             consistency: 0,
             experience: 0,
             activity: 0,
+            detailedScore: 0,
+            negativePenalty: 0,
+            feedbackCountFactor: 0,
             reviewsCount: 0,
             rehireProbability: 0,
             cluster: 'average',
@@ -870,55 +906,170 @@ async function recomputeWorkerTrust(workerId) {
     return;
   }
 
-  const ratings = feedbacks.map((f) => f.numericRating || 3);
-  const sumRatings = ratings.reduce((s, r) => s + r, 0);
-  const avgRating = sumRatings / n;
+  const reliabilityMap = {
+    Always: 5,
+    Often: 4,
+    Sometimes: 3,
+    Rarely: 2,
+    Never: 1,
+  };
 
-  const sentiments = feedbacks.map((f) =>
-    typeof f.sentimentScore01 === 'number' ? f.sentimentScore01 : 0.5
-  );
-  const avgSentiment =
-    sentiments.reduce((s, v) => s + v, 0) / sentiments.length;
+  const textRatingMap = {
+    Excellent: 5,
+    VeryGood: 5,
+    Good: 4,
+    Fair: 3,
+    Average: 3,
+    Poor: 2,
+    Bad: 1,
+  };
 
-  const mean = avgRating;
-  const variance =
-    ratings.reduce((s, r) => s + Math.pow(r - mean, 2), 0) / n;
-  const maxVar = 2;
-  let consistency = 1 - variance / maxVar;
-  if (consistency < 0) consistency = 0;
-  if (consistency > 1) consistency = 1;
+  const satisfactionMap = {
+    'Very satisfied': 1,
+    Satisfied: 0.85,
+    Neutral: 0.6,
+    'Somewhat satisfied': 0.75,
+    'Unsatisfied': 0.25,
+    'Very unsatisfied': 0.1,
+  };
 
-  const yearsExp = Number(worker.experienceYears || 0);
-  const experience = Math.min(Math.max(yearsExp, 0), 10) / 10;
+  const halfLifeDays = 30;
+  const decayK = Math.log(2) / (halfLifeDays * 24 * 60 * 60 * 1000);
 
-  const now = Date.now();
-  const halfLifeDays = 90;
-  const k =
-    Math.log(2) / (halfLifeDays * 24 * 60 * 60 * 1000);
-  let activitySum = 0;
-  feedbacks.forEach((f) => {
-    const ts = f.createdAt ? new Date(f.createdAt).getTime() : now;
-    const ageMs = now - ts;
-    const weight = Math.exp(-k * ageMs);
-    activitySum += weight;
+  const normalizeRating = (value) => {
+    if (value == null) return 3;
+    if (typeof value === 'number') return Math.min(5, Math.max(1, value));
+    const normalized = textRatingMap[value] || textRatingMap[value?.replace(/\s+/g, '')] || 3;
+    return normalized;
+  };
+
+  const normalizeSatisfaction = (value) => {
+    if (value == null) return 0.5;
+    if (typeof value === 'number') return Math.min(1, Math.max(0, value));
+    return satisfactionMap[value] ?? 0.5;
+  };
+
+  const normalizeReliability = (value) => {
+    if (value == null) return 3;
+    if (typeof value === 'number') return Math.min(5, Math.max(1, value));
+    return reliabilityMap[value] || reliabilityMap[value?.replace(/\s+/g, '')] || 3;
+  };
+
+  const normalizeSentiment = (value) => {
+    if (typeof value === 'number') return Math.min(1, Math.max(-1, value));
+    return 0;
+  };
+
+  let weightSum = 0;
+  let ratingWeightedSum = 0;
+  let sentimentWeightedSum = 0;
+  let featureWeightedSum = 0;
+  let recentActivitySum = 0;
+  let negativePenalty = 0;
+  let rawRatingValues = [];
+  let rawSentimentValues = [];
+
+  const feedbackDetails = feedbacks.map((feedback) => {
+    const createdAt = feedback.createdAt ? new Date(feedback.createdAt).getTime() : now;
+    const ageMs = Math.max(0, now - createdAt);
+    const ageDays = ageMs / (24 * 60 * 60 * 1000);
+    const timeWeight = Math.exp(-decayK * ageMs);
+
+    const numericRating = normalizeRating(feedback.numericRating ?? feedback.ratings?.overallRating ?? 3);
+    const sentimentScore01 = normalizeSentiment(feedback.sentimentScore01 ?? 0);
+    const reliability = normalizeReliability(feedback.ratings?.reliability);
+    const professionalism = normalizeRating(feedback.ratings?.professionalism);
+    const skill = normalizeRating(feedback.ratings?.skillCompetence || feedback.ratings?.skill);
+    const attention = normalizeRating(feedback.ratings?.attentionToDetail || feedback.ratings?.attention);
+    const satisfaction = normalizeSatisfaction(feedback.ratings?.overallSatisfaction ?? feedback.ratings?.satisfaction);
+
+    const featureRating = (reliability + professionalism + skill + attention) / 4;
+    const detailedScore = featureRating / 5 * 0.6 + satisfaction * 0.25 + ((sentimentScore01 + 1) / 2) * 0.15;
+
+    if (ageDays <= 30) {
+      recentActivitySum += timeWeight;
+    }
+
+    if (sentimentScore01 < 0) {
+      const sentimentMagnitude = Math.min(1, Math.abs(sentimentScore01));
+      const basePenalty = 10 + sentimentMagnitude * 10;
+      const recencyMultiplier = ageDays <= 7 ? 1.5 : 1 + Math.max(0, (14 - Math.min(ageDays, 14)) / 40);
+      negativePenalty += basePenalty * recencyMultiplier;
+    }
+
+    weightSum += timeWeight;
+    ratingWeightedSum += numericRating * timeWeight;
+    sentimentWeightedSum += sentimentScore01 * timeWeight;
+    featureWeightedSum += detailedScore * timeWeight;
+    rawRatingValues.push({ value: numericRating, weight: timeWeight });
+    rawSentimentValues.push({ value: sentimentScore01, weight: timeWeight });
+
+    return {
+      numericRating,
+      sentimentScore01,
+      detailedScore,
+      timeWeight,
+      ageDays,
+    };
   });
-  const activity = Math.min(activitySum / 10, 1);
 
-  const trustScoreRaw =
-    avgRating * 20 +
-    avgSentiment * 30 +
-    consistency * 20 +
-    experience * 10 +
-    activity * 20;
+  if (weightSum === 0) {
+    weightSum = feedbackDetails.length || 1;
+  }
 
-  const trustScore = Math.max(0, Math.min(trustScoreRaw, 100));
+  const avgRating = ratingWeightedSum / weightSum;
+  const avgSentiment = sentimentWeightedSum / weightSum;
+  const avgDetailedScore = featureWeightedSum / weightSum;
+
+  const weightedVariance = (values, mean) => {
+    const total = values.reduce((sum, item) => sum + item.weight * Math.pow(item.value - mean, 2), 0);
+    return total / weightSum;
+  };
+
+  const ratingVariance = weightedVariance(rawRatingValues, avgRating);
+  const sentimentVariance = weightedVariance(rawSentimentValues, avgSentiment);
+  const consistency = 1 - Math.min(1, (ratingVariance / 4) * 0.8 + (sentimentVariance / 1) * 0.2);
+
+  const activity = Math.min(1, recentActivitySum / Math.max(2, Math.min(n, 6)));
+  const experience = Math.min(Math.max(Number(worker.experienceYears || worker.yearsExperience || 0), 0), 10) / 10;
+
+  const feedbackCountFactor = Math.min(1, 0.6 + Math.min(n, 5) * 0.08);
+
+  const ratingComponent = ((avgRating - 1) / 4) * 25;
+  const sentimentComponent = ((avgSentiment + 1) / 2) * 25;
+  const consistencyComponent = consistency * 10;
+  const activityComponent = activity * 10;
+  const experienceComponent = experience * 10;
+  const detailedComponent = avgDetailedScore * 20;
+
+  let trustScoreRaw =
+    ratingComponent +
+    sentimentComponent +
+    consistencyComponent +
+    activityComponent +
+    experienceComponent +
+    detailedComponent;
+
+  trustScoreRaw *= feedbackCountFactor;
+  trustScoreRaw -= Math.min(45, negativePenalty);
+
+  let trustScore = Math.max(0, Math.min(trustScoreRaw, 100));
+
+  if (n < 3) {
+    trustScore = Math.min(trustScore, 75);
+  } else if (n < 5) {
+    trustScore = Math.min(trustScore, 85);
+  }
 
   const baseMeta = {
     avgRating,
-    sentimentScore01: avgSentiment,
+    avgSentiment,
     consistency,
     experience,
     activity,
+    detailedScore: avgDetailedScore,
+    negativePenalty: Math.round(negativePenalty * 10) / 10,
+    feedbackCountFactor: Math.round(feedbackCountFactor * 100) / 100,
     reviewsCount: n,
   };
 
@@ -934,7 +1085,6 @@ async function recomputeWorkerTrust(workerId) {
     cluster: trustCluster,
   };
 
-  // Pre-computed ranking bucket for filtering
   let rankingBucket = 'medium';
   if (trustScore >= 80 && (worker.safetyIncidents || 0) === 0) rankingBucket = 'top';
   else if (trustScore <= 50 || (worker.safetyIncidents || 0) >= 1) rankingBucket = 'risky';
@@ -953,9 +1103,9 @@ async function recomputeWorkerTrust(workerId) {
           summary: `${worker.name} - Trust: ${trustScore.toFixed(1)}, Reviews: ${n}`,
           trustScore,
           createdAt: new Date().toISOString(),
-          source: 'trust_recalc'
-        }
-      }
+          source: 'trust_recalc',
+        },
+      },
     }
   );
 }
@@ -1211,10 +1361,6 @@ app.get('/api/workers', async (req, res) => {
     query.verificationLevel = { $in: ['id', 'police'] };
   } else if (verification === 'police') {
     query.verificationLevel = 'police';
-  }
-  // Ranking bucket filter (exclude risky by default)
-  if (!req.query.includeRisky) {
-    query.rankingBucket = { $ne: 'risky' };
   }
   if (q) {
     const normalizedQ = String(q).toLowerCase().trim();
@@ -1596,6 +1742,55 @@ app.post('/api/feedback', async (req, res) => {
     const sentimentScore01 = computeSentimentScore(
       improvementSuggestions || ''
     );
+
+    // 🔥 ML preprocessing (ADD THIS BLOCK)
+
+const reliabilityMap = {
+  "Always": 1,
+  "Sometimes": 0.5,
+  "Rarely": 0
+};
+
+const ratingMap = {
+  "Excellent": 5,
+  "Good": 4
+};
+
+const satisfactionMap = {
+  "Very satisfied": 1,
+  "Satisfied": 0.75,
+  "Neutral": 0.5,
+  "Unsatisfied": 0
+};
+
+const workQuality = ratings.workQuality;
+
+const reliability = reliabilityMap[ratings.reliability] || 0;
+
+const attention =
+  ratingMap[ratings.attentionToDetail] || ratings.attentionToDetail || 0;
+
+const professionalism =
+  ratingMap[ratings.professionalism] || ratings.professionalism || 0;
+
+const skill =
+  ratingMap[ratings.skillCompetence] || ratings.skillCompetence || 0;
+
+const satisfaction =
+  satisfactionMap[ratings.overallSatisfaction] || 0;
+
+// ML-ready features
+const mlFeatures = {
+  workQuality,
+  reliability,
+  attention,
+  professionalism,
+  skill,
+  satisfaction,
+  sentiment: sentimentScore01
+};
+
+console.log("ML Features:", mlFeatures);
 
     const nowISO = new Date().toISOString();
 
