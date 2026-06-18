@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import './styles.css';
+import { useLanguage } from '../contexts/LanguageContext';
+import { getFilterOptions } from '../filterOptions';
 
 const EmployerSearch = ({ onSearch }) => {
-  const [city, setCity] = useState('Bhiwani');
+  const { language } = useLanguage();
+  const filterOptions = getFilterOptions(language);
+  const [city, setCity] = useState('bhiwani');
   const [skill, setSkill] = useState('cooking');
 
   const handleSubmit = (e) => {
@@ -106,8 +110,13 @@ const EmployerSearch = ({ onSearch }) => {
                 e.currentTarget.style.borderColor = '#d4e8df';
               }}
             >
-              <option value="Bhiwani">Bhiwani</option>
-              <option value="Delhi">Delhi</option>
+              {filterOptions.cities
+                .filter((item) => item.value)
+                .map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
             </select>
           </label>
 
@@ -124,9 +133,13 @@ const EmployerSearch = ({ onSearch }) => {
                 e.currentTarget.style.borderColor = '#d4e8df';
               }}
             >
-              <option value="cooking">Cooking</option>
-              <option value="cleaning">Cleaning</option>
-              <option value="babysitting">Babysitting</option>
+              {filterOptions.skills
+                .filter((item) => item.value)
+                .map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
             </select>
           </label>
         </div>

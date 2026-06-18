@@ -2,13 +2,21 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE } from '../api';
+import { useLanguage } from '../contexts/LanguageContext';
+import { getFilterOptions } from '../filterOptions';
 
 export default function WorkersList() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const filterOptions = getFilterOptions(language);
 
   const [workers, setWorkers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [requestLoading, setRequestLoading] = useState(false);
+  const [requestMessage, setRequestMessage] = useState('');
   const [flipped, setFlipped] = useState({});
+  const [contactRequests, setContactRequests] = useState([]);
+  const [requestsLoading, setRequestsLoading] = useState(false);
   const [filters, setFilters] = useState({
     cityArea: 'kurnool',
     minExp: '',
@@ -21,6 +29,69 @@ export default function WorkersList() {
   const handleHireClick = (worker) => {
     console.log("Hiring:", worker);
     // later open dialog here
+  };
+
+  const loadContactRequests = async () => {
+    const userData = localStorage.getItem('userData');
+    const employer = userData ? JSON.parse(userData) : null;
+    if (!employer || !employer.phone) {
+      setContactRequests([]);
+      return;
+    }
+
+    setRequestsLoading(true);
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/contact-requests/employer?phone=${encodeURIComponent(employer.phone)}`,
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      const data = await res.json();
+      if (res.ok) {
+        setContactRequests(data.requests || []);
+      } else {
+        console.error('Failed to load contact requests:', data.error);
+        setContactRequests([]);
+      }
+    } catch (err) {
+      console.error('Error loading contact requests:', err);
+      setContactRequests([]);
+    } finally {
+      setRequestsLoading(false);
+    }
+  };
+
+  const handleRequestContact = async (worker) => {
+    const userData = localStorage.getItem('userData');
+    const employer = userData ? JSON.parse(userData) : null;
+    if (!employer || !employer.phone || !employer.name) {
+      alert('Employer data is missing. Please log in again.');
+      return;
+    }
+
+    setRequestLoading(true);
+    setRequestMessage('');
+    try {
+      const res = await fetch(`${API_BASE}/api/contact-requests`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workerId: worker._id,
+          employerName: employer.name,
+          employerPhone: employer.phone,
+          employerCity: employer.city || '',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to send contact request');
+      }
+      setRequestMessage('✅ Contact request sent successfully. Await worker approval to see their contact info.');
+    } catch (err) {
+      console.error('Contact request failed', err);
+      setRequestMessage('❌ Failed to send contact request. Please try again.');
+    } finally {
+      setRequestLoading(false);
+    }
   };
 
   const theme = {
@@ -69,6 +140,7 @@ export default function WorkersList() {
 
   useEffect(() => {
     fetchWorkers();
+    loadContactRequests();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -242,11 +314,10 @@ export default function WorkersList() {
                 <label style={{ fontSize: 12, fontWeight: 700, color: theme.text, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   City / Area
                 </label>
-                <input
+                <select
                   name="cityArea"
                   value={filters.cityArea}
                   onChange={handleChange}
-                  placeholder="Bhiwani"
                   style={{
                     height: 44, borderRadius: 12, border: `1px solid ${theme.border}`,
                     padding: '0 12px', fontSize: 14, color: theme.text,
@@ -254,18 +325,23 @@ export default function WorkersList() {
                   }}
                   onFocus={(e) => e.currentTarget.style.borderColor = theme.primary}
                   onBlur={(e) => e.currentTarget.style.borderColor = theme.border}
-                />
+                >
+                  {filterOptions.cities.map((item) => (
+                    <option key={item.value || 'all-cities'} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <label style={{ fontSize: 12, fontWeight: 700, color: theme.text, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   Skill
                 </label>
-                <input
+                <select
                   name="skill"
                   value={filters.skill}
                   onChange={handleChange}
-                  placeholder="Cooking"
                   style={{
                     height: 44, borderRadius: 12, border: `1px solid ${theme.border}`,
                     padding: '0 12px', fontSize: 14, color: theme.text,
@@ -273,7 +349,13 @@ export default function WorkersList() {
                   }}
                   onFocus={(e) => e.currentTarget.style.borderColor = theme.primary}
                   onBlur={(e) => e.currentTarget.style.borderColor = theme.border}
-                />
+                >
+                  {filterOptions.skills.map((item) => (
+                    <option key={item.value || 'all-skills'} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* ← NEW: Verification Filter */}
@@ -293,9 +375,11 @@ export default function WorkersList() {
                   onFocus={(e) => e.currentTarget.style.borderColor = theme.primary}
                   onBlur={(e) => e.currentTarget.style.borderColor = theme.border}
                 >
-                  <option value="">Any</option>
-                  <option value="id">ID Verified</option>
-                  <option value="police">Police Verified</option>
+                  {filterOptions.verification.map((item) => (
+                    <option key={item.value || 'any-verification'} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -303,11 +387,10 @@ export default function WorkersList() {
                 <label style={{ fontSize: 12, fontWeight: 700, color: theme.text, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   Min Experience (years)
                 </label>
-                <input
-                  type="number"
-                  placeholder="0"
+                <select
+                  name="minExp"
                   value={filters.minExp}
-                  onChange={(e) => setFilters({ ...filters, minExp: e.target.value })}
+                  onChange={handleChange}
                   style={{
                     height: 44, borderRadius: 12, border: `1px solid ${theme.border}`,
                     padding: '0 12px', fontSize: 14, color: theme.text,
@@ -315,18 +398,23 @@ export default function WorkersList() {
                   }}
                   onFocus={(e) => e.currentTarget.style.borderColor = theme.primary}
                   onBlur={(e) => e.currentTarget.style.borderColor = theme.border}
-                />
+                >
+                  {filterOptions.experience.map((item) => (
+                    <option key={item.value || 'any-experience'} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <label style={{ fontSize: 12, fontWeight: 700, color: theme.text, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   Max Salary
                 </label>
-                <input
-                  type="number"
-                  placeholder="Enter max"
+                <select
+                  name="maxSalary"
                   value={filters.maxSalary}
-                  onChange={(e) => setFilters({ ...filters, maxSalary: e.target.value })}
+                  onChange={handleChange}
                   style={{
                     height: 44, borderRadius: 12, border: `1px solid ${theme.border}`,
                     padding: '0 12px', fontSize: 14, color: theme.text,
@@ -334,7 +422,13 @@ export default function WorkersList() {
                   }}
                   onFocus={(e) => e.currentTarget.style.borderColor = theme.primary}
                   onBlur={(e) => e.currentTarget.style.borderColor = theme.border}
-                />
+                >
+                  {filterOptions.salary.map((item) => (
+                    <option key={item.value || 'any-salary'} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Sort by Trust */}
@@ -368,8 +462,11 @@ export default function WorkersList() {
                   onFocus={(e) => (e.currentTarget.style.borderColor = theme.primary)}
                   onBlur={(e) => (e.currentTarget.style.borderColor = theme.border)}
                 >
-                  <option value="yes">Highest trust first</option>
-                  <option value="no">Default order</option>
+                  {filterOptions.sortByTrust.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -391,7 +488,92 @@ export default function WorkersList() {
 
           {loading && <p style={{ color: theme.secondary }}>Loading workers...</p>}
 
-          {!loading && workers.length === 0 && (
+          {requestMessage && (
+            <div style={{ margin: '16px 0', padding: '14px 18px', borderRadius: 14, background: requestMessage.startsWith('✅') ? '#ECFDF5' : '#FEF3F2', color: requestMessage.startsWith('✅') ? '#166534' : '#B91C1C' }}>
+              {requestMessage}
+            </div>
+          )}
+
+          {/* ===== CONTACT REQUESTS SECTION ===== */}
+          {contactRequests.length > 0 && (
+            <div style={{
+              background: theme.card, border: `1px solid ${theme.border}`,
+              borderRadius: 18, boxShadow: '0 12px 30px rgba(10, 40, 25, 0.08)',
+              padding: 24, marginBottom: 24,
+            }}>
+              <h2 style={{
+                margin: '0 0 16px 0', color: theme.text, fontSize: 18, fontWeight: 800,
+              }}>
+                📋 Your Contact Requests ({contactRequests.length})
+              </h2>
+              <p style={{ margin: '0 0 16px 0', color: theme.secondary, fontSize: 13 }}>
+                Track the status of contact requests you've sent to workers.
+              </p>
+
+              <div style={{ display: 'grid', gap: 12 }}>
+                {contactRequests.map((req) => {
+                  const statusColors = {
+                    pending: { bg: '#FEF3C7', color: '#B45309', label: '⏳ Pending' },
+                    approved: { bg: '#DCFCE7', color: '#166534', label: '✅ Approved' },
+                    rejected: { bg: '#FEE2E2', color: '#B91C1C', label: '❌ Rejected' },
+                  };
+                  const s = statusColors[req.status] || statusColors.pending;
+
+                  return (
+                    <div
+                      key={req._id}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr auto auto',
+                        gap: 16,
+                        alignItems: 'center',
+                        padding: 14,
+                        borderRadius: 12,
+                        border: `1px solid ${theme.border}`,
+                        background: '#f9fafb',
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14, color: theme.text, marginBottom: 4 }}>
+                          {req.workerName || 'Worker'}{req.workerContact && req.status === 'approved' ? ` · ${req.workerContact}` : ''}
+                        </div>
+                        <div style={{ fontSize: 12, color: theme.secondary }}>
+                          Requested on {new Date(req.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+
+                      <div style={{
+                        padding: '6px 12px',
+                        borderRadius: 99,
+                        background: s.bg,
+                        color: s.color,
+                        fontWeight: 700,
+                        fontSize: 12,
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {s.label}
+                      </div>
+
+                      {req.status === 'approved' && req.workerContact && (
+                        <div style={{
+                          padding: '8px 14px',
+                          background: '#DCFCE7',
+                          color: '#166534',
+                          borderRadius: 8,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          textAlign: 'center',
+                        }}>
+                          Call: {req.workerContact}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
             <p style={{ color: theme.secondary }}>No workers found yet. Ask a worker to create a profile first.</p>
           )}
 
@@ -722,21 +904,37 @@ export default function WorkersList() {
                           View Resume
                         </button>
 
-                        <button
-                          style={{
-                            marginTop: '8px',
-                            padding: '10px 18px',
-                            background: '#1f2937',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '8px',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                          }}
-                          onClick={() => handleHireClick(w)}
-                        >
-                          Hire this employee
-                        </button>
+                        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 8 }}>
+                          <button
+                            style={{
+                              padding: '10px 18px',
+                              background: '#1f2937',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '8px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                            }}
+                            onClick={() => handleHireClick(w)}
+                          >
+                            Hire this employee
+                          </button>
+                          <button
+                            style={{
+                              padding: '10px 18px',
+                              background: requestLoading ? '#94a3b8' : '#2563eb',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '8px',
+                              fontWeight: 600,
+                              cursor: requestLoading ? 'not-allowed' : 'pointer',
+                            }}
+                            onClick={() => handleRequestContact(w)}
+                            disabled={requestLoading}
+                          >
+                            {requestLoading ? 'Sending...' : 'Request contact'}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

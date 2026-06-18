@@ -15,7 +15,13 @@ import {
 import { connectDB } from './db.js';
 import i18nRouter from './routes/i18n.js';
 import verifyDocRoute from './VerifydocRoute.js';
-import { CITY_MAP } from './cityMap.js';
+import {
+  normalizeCityCode,
+  normalizeSkillCode,
+  normalizeSkillCodes,
+  workerCityCodes,
+  workerSkillCodes,
+} from './filterNormalizers.js';
 import Sentiment from 'sentiment';  // [web:43]
 import { createWorker } from 'tesseract.js';
 import rateLimit from 'express-rate-limit';
@@ -796,6 +802,7 @@ let workersCollection = null;
 let usersCollection = null;
 let tempOtpCollection = null;
 let hireRequestsCollection = null;
+let contactRequestsCollection = null;
 
 /* ------------------ TRUST SCORE HELPERS ------------------ */
 
@@ -1174,13 +1181,6 @@ app.post('/api/profile/answer', (req, res) => {
 });
 
 // 3️⃣ Complete profile
-function normalizeCity(raw) {
-  if (!raw) return '';
-  const cleaned = String(raw).toLowerCase().trim();
-  const base = cleaned.split(',')[0];
-  return CITY_MAP[cleaned] || CITY_MAP[base] || cleaned;
-}
-
 function buildSearchKeyEn(draft) {
   const parts = [];
 
@@ -1188,8 +1188,8 @@ function buildSearchKeyEn(draft) {
     parts.push(String(draft.name));
   }
 
-  if (draft.cityArea) parts.push(normalizeCity(draft.cityArea));
-  if (draft.city) parts.push(normalizeCity(draft.city));
+  if (draft.cityArea) parts.push(normalizeCityCode(draft.cityArea));
+  if (draft.city) parts.push(normalizeCityCode(draft.city));
 
   if (draft.state && /^[\x00-\x7F]+$/.test(draft.state)) {
     parts.push(String(draft.state));
@@ -1200,10 +1200,8 @@ function buildSearchKeyEn(draft) {
       ? draft.skills
       : String(draft.skills).split(/[,\s]+/);
 
-    const latinSkills = skillsArr.filter(s => /^[\x00-\x7F]+$/.test(s));
-    if (latinSkills.length) {
-      parts.push(latinSkills.join(' '));
-    }
+    const skillCodes = skillsArr.map(normalizeSkillCode).filter(Boolean);
+    if (skillCodes.length) parts.push(skillCodes.join(' '));
   }
 
   if (draft.workType && /^[\x00-\x7F]+$/.test(draft.workType)) {
@@ -1221,7 +1219,7 @@ function buildSearchKeyEn(draft) {
 }
 
 app.post('/api/profile/complete', async (req, res) => {
-  const { sessionId, draft: directDraft } = req.body || {};
+  const { sessionId, draft: directDraft, workerPhone } = req.body || {};
 
   let draft;
   if (sessionId && sessions.has(sessionId)) {
@@ -1282,6 +1280,7 @@ app.post('/api/profile/complete', async (req, res) => {
   }
   const worker = {
     ...draft,
+    phone: workerPhone || null,
     trustScore,
     trustMeta: {
       avgRating: 0,
@@ -1314,6 +1313,8 @@ app.post('/api/profile/complete', async (req, res) => {
       emergencyContactPhone: existingWorker?.safety?.emergencyContactPhone || null,
       emergencyContactVerified: existingWorker?.safety?.emergencyContactVerified || false,
     },
+    cityCode: normalizeCityCode(draft.cityArea || draft.city),
+    skillCodes: normalizeSkillCodes(draft.skills),
     searchKey_en: buildSearchKeyEn(draft),
     feedbacks: [],
     feedbackCount: 0
@@ -1335,42 +1336,28 @@ app.post('/api/profile/complete', async (req, res) => {
 });
 /* ------------------ EMPLOYER SEARCH ------------------ */
 app.get('/api/workers', async (req, res) => {
-  const { cityArea, skill, minExp, maxSalary, q, verification } = req.query;
+  const { cityArea, skill, minExp, maxSalary, q, verification, sortBy } = req.query;
+  const cityCode = normalizeCityCode(cityArea || q);
+  const skillCode = normalizeSkillCode(skill);
   const query = {};
-  if (!q && cityArea) {
-    query.$or = [
-      { city: { $regex: cityArea, $options: 'i' } },
-      { cityArea: { $regex: cityArea, $options: 'i' } }
-    ];
-  }
-  if (skill) {
-    query.skills = { $elemMatch: { $regex: skill, $options: 'i' } };
-  }
+  const exprFilters = [];
+
   if (minExp !== undefined && minExp !== '') {
-    query.$expr = {
-      $gte: [{ $toInt: '$experienceYears' }, Number(minExp)]
-    };
+    exprFilters.push({ $gte: [{ $toInt: '$experienceYears' }, Number(minExp)] });
   }
   if (maxSalary !== undefined && maxSalary !== '') {
-    query.$expr = {
-      $lte: [{ $toInt: '$expectedSalary' }, Number(maxSalary)]
-    };
+    exprFilters.push({ $lte: [{ $toInt: '$expectedSalary' }, Number(maxSalary)] });
+  }
+  if (exprFilters.length === 1) {
+    query.$expr = exprFilters[0];
+  } else if (exprFilters.length > 1) {
+    query.$expr = { $and: exprFilters };
   }
   // NEW: verification filter
   if (verification === 'id') {
     query.verificationLevel = { $in: ['id', 'police'] };
   } else if (verification === 'police') {
     query.verificationLevel = 'police';
-  }
-  if (q) {
-    const normalizedQ = String(q).toLowerCase().trim();
-    if (normalizedQ) {
-      query.$or = [
-        { searchKey_en: { $regex: normalizedQ, $options: 'i' } },
-        { cityArea:     { $regex: normalizedQ, $options: 'i' } },
-        { city:         { $regex: normalizedQ, $options: 'i' } }
-      ];
-    }
   }
   try {
     const users = await usersCollection.find({ role: 'employer' }).toArray();
@@ -1415,7 +1402,9 @@ app.get('/api/workers', async (req, res) => {
           },
         },
       },
-      { $sort: { candidateScore: -1, matchScore: -1, trustScore: -1 } },
+      sortBy === 'trust'
+        ? { $sort: { candidateScore: -1, matchScore: -1, trustScore: -1 } }
+        : { $sort: { createdAt: -1 } },
     ];
     const mongoWorkers = await workersCollection.aggregate(pipeline).toArray();
     const enrichedWorkers = mongoWorkers.map((w) => {
@@ -1433,6 +1422,10 @@ app.get('/api/workers', async (req, res) => {
             : 'LOW',
         safetyScore,
       };
+    }).filter((w) => {
+      if (cityCode && !workerCityCodes(w).includes(cityCode)) return false;
+      if (skillCode && !workerSkillCodes(w).includes(skillCode)) return false;
+      return true;
     });
 
     res.json({ workers: enrichedWorkers });
@@ -2227,6 +2220,156 @@ app.patch('/api/hire-requests/:id', async (req, res) => {
   }
 });
 
+// POST /api/contact-requests - Employer creates a contact request for worker details
+app.post('/api/contact-requests', async (req, res) => {
+  try {
+    const { workerId, employerPhone, employerName, employerCity } = req.body || {};
+
+    if (!workerId || !employerPhone || !employerName) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const worker = await workersCollection.findOne({ _id: new ObjectId(workerId) });
+    if (!worker) {
+      return res.status(404).json({ error: 'Worker not found' });
+    }
+
+    const employer = await usersCollection.findOne({ phone: employerPhone, role: 'employer' });
+    if (!employer) {
+      return res.status(404).json({ error: 'Employer not found' });
+    }
+
+    // Use worker's stored login phone (set during profile completion)
+    const loginPhone = worker.phone;
+    if (!loginPhone) {
+      return res.status(400).json({ error: 'Worker has not completed profile with phone' });
+    }
+
+    const contactRequest = {
+      workerId: new ObjectId(workerId),
+      workerPhone: loginPhone,  // Use login phone, not emergency contact
+      workerName: worker.name || '',
+      workerCity: worker.city || '',
+      employerId: employer._id,
+      employerPhone,
+      employerName,
+      employerCity: employerCity || employer.city || '',
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      respondedAt: null,
+    };
+
+    const result = await contactRequestsCollection.insertOne(contactRequest);
+    res.status(201).json({ message: 'Contact request created successfully', contactRequest: { ...contactRequest, _id: result.insertedId } });
+  } catch (err) {
+    console.error('Create contact request error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.get('/api/contact-requests/worker', async (req, res) => {
+  try {
+    const workerPhone = req.query.phone;
+    const status = req.query.status || 'all';
+
+    if (!workerPhone) {
+      return res.status(400).json({ error: 'Worker phone required' });
+    }
+
+    const query = { workerPhone };
+    if (status !== 'all') {
+      query.status = status;
+    }
+
+    const requests = await contactRequestsCollection
+      .find(query)
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    res.json({ contactRequests: requests });
+  } catch (err) {
+    console.error('Get contact requests for worker error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.get('/api/contact-requests/employer', async (req, res) => {
+  try {
+    const employerPhone = req.query.phone;
+    const status = req.query.status || 'all';
+
+    if (!employerPhone) {
+      return res.status(400).json({ error: 'Employer phone required' });
+    }
+
+    const query = { employerPhone };
+    if (status !== 'all') {
+      query.status = status;
+    }
+
+    const requests = await contactRequestsCollection
+      .find(query)
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    const enriched = await Promise.all(requests.map(async (request) => {
+      const worker = await workersCollection.findOne({ _id: new ObjectId(request.workerId) });
+      return {
+        ...request,
+        workerName: request.workerName || worker?.name || '',
+        workerCity: request.workerCity || worker?.city || '',
+        workerContact: request.status === 'approved' ? request.workerPhone : null,
+      };
+    }));
+
+    res.json({ requests: enriched });
+  } catch (err) {
+    console.error('Get contact requests for employer error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.patch('/api/contact-requests/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, workerPhone } = req.body || {};
+
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status. Must be approved or rejected' });
+    }
+
+    const contactRequest = await contactRequestsCollection.findOne({ _id: new ObjectId(id) });
+    if (!contactRequest) {
+      return res.status(404).json({ error: 'Contact request not found' });
+    }
+
+    if (contactRequest.workerPhone !== workerPhone) {
+      return res.status(403).json({ error: 'Not authorized to update this request' });
+    }
+
+    if (contactRequest.status !== 'pending') {
+      return res.status(400).json({ error: 'Request has already been responded to' });
+    }
+
+    await contactRequestsCollection.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          status,
+          respondedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      }
+    );
+
+    res.json({ message: `Contact request ${status} successfully` });
+  } catch (err) {
+    console.error('Update contact request error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 app.post('/api/worker/self-hire', async (req, res) => {
   try {
     const {
@@ -2706,6 +2849,7 @@ const PORT = process.env.PORT || 4000;
     usersCollection = db.collection('users');
     tempOtpCollection = db.collection('temp_otps');
     hireRequestsCollection = db.collection('hireRequests');
+    contactRequestsCollection = db.collection('contactRequests');
     app.locals.db = db; // expose for incidents etc. [web:71]
     console.log('MongoDB connected');
 
@@ -2719,6 +2863,11 @@ const PORT = process.env.PORT || 4000;
       await workersCollection.createIndex({ verificationLevel: 1 }); // id / police
       await workersCollection.createIndex({ updatedAt: 1 }); // for trust recalc grace period
       console.log('MongoDB indexes created');
+    }
+    if (contactRequestsCollection) {
+      await contactRequestsCollection.createIndex({ workerPhone: 1 });
+      await contactRequestsCollection.createIndex({ employerPhone: 1 });
+      await contactRequestsCollection.createIndex({ status: 1 });
     }
   } catch (err) {
     console.error('MongoDB failed, using memory mode');

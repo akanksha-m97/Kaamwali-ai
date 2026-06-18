@@ -26,11 +26,26 @@ const WorkerDashboard = () => {
 
   useEffect(() => {
     getMetrics().then(setMetrics).catch(() => {});
-    const savedPhone = localStorage.getItem('workerPhone');
+    let savedPhone = localStorage.getItem('workerPhone');
+    
+    // Fallback to userData.phone if workerPhone not set yet
+    if (!savedPhone) {
+      const userData = localStorage.getItem('userData');
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          savedPhone = user.phone;
+        } catch (e) {
+          // ignore parse error
+        }
+      }
+    }
+    
     if (savedPhone) {
       setForm(prev => ({ ...prev, workerPhone: savedPhone }));
       setVerifyForm(prev => ({ ...prev, workerPhone: savedPhone }));
       loadWorkerStatus(savedPhone);
+      loadContactRequests(savedPhone);  // Query with login phone
     }
   }, []);
 
@@ -38,7 +53,10 @@ const WorkerDashboard = () => {
     try {
       const res  = await fetch(`${API_BASE}/api/workers/by-phone/${phone}`);
       const data = await res.json();
-      if (res.ok && data.name) { setWorkerData(data); setStatus(data.isHired ? 'hired' : 'available'); }
+      if (res.ok && data.name) { 
+        setWorkerData(data); 
+        setStatus(data.isHired ? 'hired' : 'available'); 
+      }
     } catch (err) { console.error('Status load error:', err); }
   };
 
@@ -46,7 +64,62 @@ const WorkerDashboard = () => {
   const [safetyForm, setSafetyForm]       = useState({ employerPhone: '', issueType: 'Harassment/Abuse', description: '' });
   const [safetyMessage, setSafetyMessage] = useState('');
   const [safetyLoading, setSafetyLoading] = useState(false);
+
+  const [contactRequests, setContactRequests] = useState([]);
+  const [requestsLoading, setRequestsLoading] = useState(false);
+  const [requestsMessage, setRequestsMessage] = useState('');
+
   const handleSafetyChange = (e) => setSafetyForm({ ...safetyForm, [e.target.name]: e.target.value });
+
+  const formatRequestDate = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('en-IN', {
+      day: 'numeric', month: 'short', year: 'numeric'
+    });
+  };
+
+  const loadContactRequests = async (phone) => {
+    if (!phone) return;
+    setRequestsLoading(true);
+    setRequestsMessage('');
+    try {
+      const res = await fetch(`${API_BASE}/api/contact-requests/worker?phone=${encodeURIComponent(phone)}&status=all`);
+      const data = await res.json();
+      if (res.ok) {
+        setContactRequests(data.contactRequests || []);
+      } else {
+        setRequestsMessage(data.error || 'Failed to load contact requests');
+      }
+    } catch (err) {
+      setRequestsMessage('Server error while loading contact requests');
+    } finally {
+      setRequestsLoading(false);
+    }
+  };
+
+  const respondToContactRequest = async (requestId, status) => {
+    setRequestsLoading(true);
+    setRequestsMessage('');
+    try {
+      const phone = localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')).phone : '';
+      const res = await fetch(`${API_BASE}/api/contact-requests/${requestId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, workerPhone: phone }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setRequestsMessage(status === 'approved' ? '✅ Request approved' : '❌ Request rejected');
+        loadContactRequests(phone);
+      } else {
+        setRequestsMessage(data.error || 'Failed to update request');
+      }
+    } catch (err) {
+      setRequestsMessage('Server error while updating request');
+    } finally {
+      setRequestsLoading(false);
+    }
+  };
 
   const handleUnsafe = async () => {
     setSafetyLoading(true); setSafetyMessage('');
@@ -561,6 +634,59 @@ const WorkerDashboard = () => {
                     </button>
                     {message && <div className="wd-msg-neutral">{message}</div>}
                   </div>
+                </div>
+
+                <div className="wd-card">
+                  <div className="wd-card-header">
+                    <div className="wd-card-icon wd-card-icon-blue">📩</div>
+                    <div>
+                      <div className="wd-card-title">Contact Requests</div>
+                      <div className="wd-card-subtitle">Review incoming employer requests to share your contact details.</div>
+                    </div>
+                  </div>
+
+                  {requestsMessage && <div className={`wd-msg ${requestsMessage.includes('✅') ? 'wd-msg-success' : requestsMessage.includes('❌') ? 'wd-msg-error' : 'wd-msg-neutral'}`} style={{ marginBottom: 14 }}>{requestsMessage}</div>}
+
+                  {requestsLoading ? (
+                    <div style={{ padding: '20px 0', textAlign: 'center', color: '#555' }}>Loading requests…</div>
+                  ) : contactRequests.length === 0 ? (
+                    <div style={{ padding: '18px 14px', borderRadius: 12, background: '#f8fafc', color: '#334155' }}>
+                      No contact requests yet. Employers will send a request when they want to contact you directly.
+                    </div>
+                  ) : (
+                    <div className="wd-request-list">
+                      {contactRequests.map(req => (
+                        <div className="wd-request-item" key={req._id}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                            <div>
+                              <div style={{ fontWeight: 700, marginBottom: 4 }}>{req.employerName || 'Employer'}</div>
+                              <div style={{ fontSize: 13, color: '#475569' }}>Phone: {req.employerPhone}</div>
+                              <div style={{ fontSize: 13, color: '#475569' }}>City: {req.employerCity || 'N/A'}</div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <div className={`wd-badge`} style={{ background: req.status === 'approved' ? '#dcfce7' : req.status === 'rejected' ? '#fee2e2' : '#f8fafc', color: req.status === 'approved' ? '#166534' : req.status === 'rejected' ? '#b91c1c' : '#475569' }}>
+                                {req.status.toUpperCase()}
+                              </div>
+                              <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>{formatRequestDate(req.createdAt)}</div>
+                            </div>
+                          </div>
+                          <div style={{ fontSize: 13, color: '#334155', marginTop: 10 }}>
+                            Requested contact for: {req.workerName || 'your profile'}
+                          </div>
+                          {req.status === 'pending' && (
+                            <div style={{ display: 'flex', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
+                              <button type="button" className="wd-btn wd-btn-success" onClick={() => respondToContactRequest(req._id, 'approved')} disabled={requestsLoading}>
+                                Approve
+                              </button>
+                              <button type="button" className="wd-btn wd-btn-outline-dark" onClick={() => respondToContactRequest(req._id, 'rejected')} disabled={requestsLoading}>
+                                Reject
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>{/* end right col */}
 

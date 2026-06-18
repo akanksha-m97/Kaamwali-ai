@@ -1,8 +1,10 @@
 // src/api.js
 
 // Use Render backend URL in production, fallback to localhost for local dev
+const localHosts = ["localhost", "127.0.0.1", "::1"];
 export const API_BASE =
-  window.location.hostname === "localhost"
+  import.meta.env.VITE_API_BASE ||
+  localHosts.includes(window.location.hostname)
     ? "http://localhost:4000"
     : "https://kaamwali-1.onrender.com";
 
@@ -29,17 +31,17 @@ export async function getMetrics() {
   }
 }
 
-// Employer search: call GET /api/workers
+// Employer search: call GET /api/workers with stable filter codes.
 
-export async function searchWorkers(city, skill) {
+export async function searchWorkers(cityCode, skillCode) {
   const params = new URLSearchParams();
 
-  if (city) {
-    params.append("cityArea", city); // existing filter
-    params.append("q", city);        // NEW: free-text search on searchKey_en
+  if (cityCode) {
+    params.append("cityArea", cityCode);
+    params.append("q", cityCode);
   }
 
-  if (skill) params.append("skill", skill);
+  if (skillCode) params.append("skill", skillCode);
 
   const res = await fetch(`${API_BASE}/api/workers?${params.toString()}`);
   if (!res.ok) {
@@ -52,7 +54,11 @@ export async function searchWorkers(city, skill) {
 // Called when worker finishes onboarding
 // Always try to send both sessionId and latest draft
 export async function completeWorkerProfile(sessionId, draft) {
-  const body = draft ? { sessionId, draft } : { sessionId };
+  // Get the worker's login phone from localStorage
+  const userData = localStorage.getItem('userData');
+  const workerPhone = userData ? JSON.parse(userData).phone : null;
+  
+  const body = draft ? { sessionId, draft, workerPhone } : { sessionId, workerPhone };
 
   const res = await fetch(`${API_BASE}/api/profile/complete`, {
     method: "POST",

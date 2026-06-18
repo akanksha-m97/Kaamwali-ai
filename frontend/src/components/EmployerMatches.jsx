@@ -1,6 +1,8 @@
 // components/EmployerMatches.jsx
 import React, { useState, useEffect } from 'react';
 import HireEmployeeDialog from './HireEmployeeDialog';
+import { useLanguage } from '../contexts/LanguageContext';
+import { getFilterOptions } from '../filterOptions';
 
 const API_BASE =
   window.location.hostname === 'localhost'
@@ -8,9 +10,13 @@ const API_BASE =
     : 'https://kaamwali-ai-backend.onrender.com';
 
 const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
+  const { language } = useLanguage();
+  const filterOptions = getFilterOptions(language);
   const [hireDialogOpen, setHireDialogOpen] = useState(false);
   const [selectedWorker, setSelectedWorker] = useState(null);
   const [hireLoading, setHireLoading] = useState(false);
+  const [requestLoading, setRequestLoading] = useState(false);
+  const [requestMessage, setRequestMessage] = useState('');
   const [workers, setWorkers] = useState(propWorkers || []);
   const [loading, setLoading] = useState(false);
   const [city, setCity] = useState(propCity || 'kurnool');
@@ -114,6 +120,43 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
       setHireLoading(false);
     }
   };
+
+  const handleContactRequest = async (worker) => {
+    const userData = localStorage.getItem('userData');
+    const employer = userData ? JSON.parse(userData) : null;
+    if (!employer || !employer.phone || !employer.name) {
+      alert('Employer data is missing. Please log in again.');
+      return;
+    }
+
+    setRequestLoading(true);
+    setRequestMessage('');
+    try {
+      const response = await fetch(`${API_BASE}/api/contact-requests`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workerId: worker._id || worker.id,
+          employerName: employer.name,
+          employerPhone: employer.phone,
+          employerCity: employer.city || '',
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send contact request');
+      }
+      setRequestMessage('✅ Contact request sent successfully. The worker will be notified.');
+    } catch (error) {
+      console.error('Contact request error:', error);
+      setRequestMessage('❌ Failed to send contact request. Please try again.');
+    } finally {
+      setRequestLoading(false);
+    }
+  };
+
   const styles = {
     wrapper: {
       maxWidth: '1000px',
@@ -231,11 +274,10 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
             }}>
               City / Area
             </label>
-            <input
+            <select
               name="cityArea"
               value={filters.cityArea}
               onChange={handleChange}
-              placeholder="Bhiwani"
               style={{
                 height: 44,
                 borderRadius: 12,
@@ -247,7 +289,13 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
                 background: '#fff',
                 transition: 'border-color 0.2s',
               }}
-            />
+            >
+              {filterOptions.cities.map((item) => (
+                <option key={item.value || 'all-cities'} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -260,11 +308,10 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
             }}>
               Skill
             </label>
-            <input
+            <select
               name="skill"
               value={filters.skill}
               onChange={handleChange}
-              placeholder="Cooking"
               style={{
                 height: 44,
                 borderRadius: 12,
@@ -276,7 +323,13 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
                 background: '#fff',
                 transition: 'border-color 0.2s',
               }}
-            />
+            >
+              {filterOptions.skills.map((item) => (
+                <option key={item.value || 'all-skills'} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -305,9 +358,11 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
                 transition: 'border-color 0.2s',
               }}
             >
-              <option value="">Any</option>
-              <option value="id">ID Verified</option>
-              <option value="police">Police Verified</option>
+              {filterOptions.verification.map((item) => (
+                <option key={item.value || 'any-verification'} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -321,12 +376,10 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
             }}>
               Min Experience (years)
             </label>
-            <input
+            <select
               name="minExp"
               value={filters.minExp}
               onChange={handleChange}
-              type="number"
-              placeholder="0"
               style={{
                 height: 44,
                 borderRadius: 12,
@@ -338,7 +391,13 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
                 background: '#fff',
                 transition: 'border-color 0.2s',
               }}
-            />
+            >
+              {filterOptions.experience.map((item) => (
+                <option key={item.value || 'any-experience'} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -351,12 +410,10 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
             }}>
               Max Salary
             </label>
-            <input
+            <select
               name="maxSalary"
               value={filters.maxSalary}
               onChange={handleChange}
-              type="number"
-              placeholder="5000"
               style={{
                 height: 44,
                 borderRadius: 12,
@@ -368,7 +425,13 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
                 background: '#fff',
                 transition: 'border-color 0.2s',
               }}
-            />
+            >
+              {filterOptions.salary.map((item) => (
+                <option key={item.value || 'any-salary'} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -397,8 +460,11 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
                 transition: 'border-color 0.2s',
               }}
             >
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
+              {filterOptions.sortByTrust.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
             </select>
           </div>
         </form>
@@ -421,6 +487,11 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
         </button>
       </div>
 
+      {requestMessage && (
+        <div style={{ margin: '16px 0', padding: '14px 18px', borderRadius: 12, background: requestMessage.startsWith('✅') ? '#ECFDF5' : '#FEF3F2', color: requestMessage.startsWith('✅') ? '#166534' : '#B91C1C' }}>
+          {requestMessage}
+        </div>
+      )}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px' }}>Loading workers...</div>
       ) : (
@@ -513,13 +584,24 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <button
                     onClick={() => handleHireClick(w)}
                     style={styles.contactBtn}
                     className="hire-btn"
                   >
                     Hire this employee
+                  </button>
+                  <button
+                    onClick={() => handleContactRequest(w)}
+                    style={{
+                      ...styles.contactBtn,
+                      background: requestLoading ? '#94a3b8' : '#2563eb',
+                      borderColor: requestLoading ? '#94a3b8' : '#1d4ed8',
+                    }}
+                    disabled={requestLoading}
+                  >
+                    {requestLoading ? 'Sending…' : 'Request contact'}
                   </button>
                 </div>
               </div>
