@@ -4,7 +4,8 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  useNavigate
+  useNavigate,
+  useLocation
 } from 'react-router-dom';
 import './styles/main.css';
 
@@ -28,6 +29,7 @@ const AppContent = () => {
   const [worker, setWorker] = useState(null);
   const [metrics, setMetrics] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     getMetrics()
@@ -36,17 +38,17 @@ const AppContent = () => {
   }, []);
 
   useEffect(() => {
-    const pathToMode = {
-      '/app': 'landing',
-      '/worker-onboard': 'worker-onboard',
-      '/worker-resume': 'worker-resume',
-      '/worker-profile': 'worker-profile',
-    };
+  const pathToMode = {
+    '/app': 'landing',
+    '/worker-onboard': 'worker-onboard',
+    '/worker-resume': 'worker-resume',
+    '/worker-profile': 'worker-profile',
+  };
 
-    if (pathToMode[window.location.pathname]) {
-      setMode(pathToMode[window.location.pathname]);
-    }
-  }, []);
+  if (pathToMode[location.pathname]) {
+    setMode(pathToMode[location.pathname]);
+  }
+}, [location.pathname]);
 
   useEffect(() => {
     if (mode !== 'worker-resume') return;

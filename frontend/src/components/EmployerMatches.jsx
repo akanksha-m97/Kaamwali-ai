@@ -1,6 +1,7 @@
 // components/EmployerMatches.jsx
 import React, { useState, useEffect } from 'react';
 import HireEmployeeDialog from './HireEmployeeDialog';
+import EmployerHeader from './EmployerHeader';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getFilterOptions } from '../filterOptions';
 
@@ -239,6 +240,9 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
   };
 
   return (
+    <>
+    <EmployerHeader activePath="/for-employers" />
+    
     <div style={styles.wrapper}>
       <div style={styles.card}>
         <h1 style={{
@@ -623,6 +627,7 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
         />
       )}
     </div>
+    </>
   );
 };
 

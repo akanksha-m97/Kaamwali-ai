@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE, resolveMediaUrl } from '../api';
+import WorkerHeader from './WorkerHeader';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const LANGUAGE_OPTIONS = [
@@ -263,37 +264,10 @@ const WorkerProfile = ({ onBack }) => {
 
   return (
     <>
-      {/* NAVBAR */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 24px', height: 64, background: '#fff',
-        borderBottom: '1px solid #e5e7eb', position: 'fixed',
-        top: 0, left: 0, right: 0, zIndex: 100,
-        boxShadow: '0 1px 6px rgba(0,0,0,0.04)',
-      }}>
-        <div style={{ fontSize: 20, fontWeight: 800, color: '#111827', letterSpacing: '-0.5px', cursor: 'pointer' }}
-          onClick={() => navigate('/worker-dashboard')}>
-          KaamWali.<span style={{ color: '#16a34a' }}>AI</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <select value={language} onChange={(e) => setLanguage(e.target.value)}
-            style={{ padding: '6px 12px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 14, cursor: 'pointer' }}>
-            <option value="en">English</option>
-            <option value="hi">हिन्दी</option>
-            <option value="te">తెలుగు</option>
-            <option value="kn">ಕನ್ನಡ</option>
-            <option value="mr">मराठी</option>
-            <option value="bn">বাংলা</option>
-          </select>
-          <button onClick={() => navigate('/worker-dashboard')}
-            style={{ background: '#e5e7eb', border: 'none', fontSize: 14, fontWeight: 500, color: '#374151', cursor: 'pointer', padding: '8px 14px', borderRadius: 8 }}>
-            Dashboard
-          </button>
-        </div>
-      </div>
+        <WorkerHeader activePath="/worker-profile" />
 
       {/* PAGE */}
-      <div style={{ maxWidth: 860, margin: '0 auto', padding: '88px 24px 60px' }}>
+      <div style={{ maxWidth: 860, margin: '0 auto', padding: '24px 24px 60px' }}>
 
         {/* PROFILE HEADER */}
         <div style={cardStyle}>

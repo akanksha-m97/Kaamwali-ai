@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import EmployerHeader from './EmployerHeader';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Feedback() {
@@ -320,68 +321,7 @@ export default function Feedback() {
   return (
     <>
       {/* ===== HEADER ===== */}
-      <header style={{
-        background: '#ffffff',
-        borderBottom: '1px solid rgba(226, 232, 240, 0.9)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-      }}>
-        <div style={{
-          maxWidth: 1140,
-          margin: '0 auto',
-          padding: '0 24px',
-          height: 62,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
-          <div onClick={() => navigate('/')} style={{
-            cursor: 'pointer',
-            fontWeight: 800,
-            fontSize: 18,
-            color: '#0d2e59',
-            letterSpacing: '0.02em',
-          }}>
-            KaamWali<span style={{ color: '#2E7D5E' }}>.AI</span>
-          </div>
-
-          <nav style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button
-              type="button"
-              onClick={() => navigate('/employer-dashboard')}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#2E7D5E',
-                fontSize: 14,
-                cursor: 'pointer',
-                padding: '8px 12px',
-                borderRadius: 8,
-              }}
-            >
-              {t.landingForEmployers}
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/feedback')}
-              style={{
-                background: '#2E7D5E',
-                border: 'none',
-                color: '#ffffff',
-                fontSize: 14,
-                fontWeight: 700,
-                padding: '8px 14px',
-                borderRadius: 8,
-                cursor: 'pointer',
-                boxShadow: '0 6px 14px rgba(46, 125, 94, 0.35)',
-              }}
-            >
-              Feedback
-            </button>
-          </nav>
-        </div>
-      </header>
+      <EmployerHeader activePath="/feedback" />
 
       {/* ===== PAGE ===== */}
       <div style={styles.page}>

@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE, getMetrics } from '../api';
+import WorkerHeader from './WorkerHeader';
 import { useLanguage } from '../contexts/LanguageContext';
 import kaamImage from '../assets/images/kaam.jpg';
 
@@ -427,23 +428,42 @@ const WorkerDashboard = () => {
                 <div className="wd-preview-title">{t.dashboardTitle || 'KaamWali.AI Dashboard'}</div>
                 <span className="wd-preview-badge">{t.workerView || 'Worker view'}</span>
               </div>
-              <div className="wd-filter-row">
-                {[t.city||'City', t.skill||'Skill', t.experience||'Experience'].map(p => <div className="wd-filter-pill" key={p}>{p}</div>)}
-              </div>
-              {[
-                { name: t.yourProfile||'Your profile', meta: t.completeDetails||'Complete your details to get more calls', tags:[t.profile||'Profile',t.trustScore||'Trust score'], badge:t.inProgress||'In progress', cls:'wd-status-amber' },
-                { name: t.newOpportunities||'New opportunities', meta: t.nearbyHomes||'Homes nearby looking for help', tags:[t.nearby||'Nearby',t.active||'Active'], badge:t.comingSoon||'Coming soon', cls:'wd-status-green' },
-                { name: t.savedHomes||'Saved homes', meta: t.likedHomes||'Homes you liked or worked with', tags:[t.repeatWork||'Repeat work',t.trusted||'Trusted'], badge:t.zeroSaved||'0 saved', cls:'wd-status-green' },
-              ].map((row,i) => (
-                <div className="wd-preview-row" key={i}>
-                  <div>
-                    <div className="wd-preview-row-name">{row.name}</div>
-                    <div className="wd-preview-row-meta">{row.meta}</div>
-                    <div className="wd-preview-tags">{row.tags.map(tag => <span className="wd-preview-tag" key={tag}>{tag}</span>)}</div>
-                  </div>
-                  <span className={`wd-status-pill ${row.cls}`}>{row.badge}</span>
-                </div>
-              ))}
+              <div className="wd-preview-row">
+  <div>
+    <div className="wd-preview-row-name">
+      Welcome, {workerData?.name || 'Worker'} 👋
+    </div>
+  </div>
+</div>
+
+<div className="wd-preview-row">
+  <div>
+    <div className="wd-preview-row-name">📍 Location</div>
+    <div className="wd-preview-row-meta">
+     {JSON.parse(localStorage.getItem('userData') || '{}')?.city || 'Not added'}
+    </div>
+  </div>
+</div>
+
+<div className="wd-preview-row">
+  <div>
+    <div className="wd-preview-row-name">🧹 Skills</div>
+    <div className="wd-preview-row-meta">
+      {workerData?.skills?.length
+        ? workerData.skills.join(', ')
+        : 'Not added'}
+    </div>
+  </div>
+</div>
+
+<div className="wd-preview-row">
+  <div>
+    <div className="wd-preview-row-name">⭐ Trust Score</div>
+    <div className="wd-preview-row-meta">
+      {workerData?.trustScore || 0}/100
+    </div>
+  </div>
+</div>
             </div>
           </div>
         </section>

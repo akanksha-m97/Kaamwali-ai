@@ -449,43 +449,85 @@ const EmployerDashboard = () => {
 
               
               {/* Floating dashboard card */}
-              <div style={{
-                position: 'relative', zIndex: 3,
-                marginLeft: 'auto', marginTop: 40, marginBottom: 40,
-                width: 300,
-                background: C.white,
-                border: `1px solid ${C.gray200}`,
-                borderRadius: 20, padding: 22,
-                boxShadow: '0 8px 40px rgba(22,43,34,0.14)',
-              }}>
-                <div style={{
-                  display: 'flex', justifyContent: 'space-between',
-                  alignItems: 'center', marginBottom: 14,
-                  paddingBottom: 12, borderBottom: `1px solid ${C.gray100}`,
-                }}>
-                  <span style={{ fontWeight: 700, fontSize: 14, color: C.gray900 }}>Employer dashboard</span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: C.teal, cursor: 'pointer' }}>Employer view</span>
-                </div>
+           {/* Floating dashboard card */}
+<div style={{
+  position: 'relative', zIndex: 3,
+  marginLeft: 'auto', marginTop: 40, marginBottom: 40,
+  width: 340,
+  background: C.white,
+  border: `1px solid ${C.gray200}`,
+  borderRadius: 20, padding: 22,
+  boxShadow: '0 8px 40px rgba(22,43,34,0.14)',
+}}>
+  <div style={{
+    display: 'flex', justifyContent: 'space-between',
+    alignItems: 'center', marginBottom: 18,
+    paddingBottom: 12, borderBottom: `1px solid ${C.gray100}`,
+  }}>
+    <span style={{ fontWeight: 700, fontSize: 14, color: C.gray900 }}>Employer dashboard</span>
+    <span style={{
+      fontSize: 11, fontWeight: 600, color: C.teal,
+      background: 'rgba(15,110,86,0.08)',
+      padding: '3px 8px', borderRadius: 8,
+    }}>
+      Employer view
+    </span>
+  </div>
 
-                <div style={{ display: 'flex', gap: 5, marginBottom: 2 }}>
-                  {['Work type', 'Timing', 'Budget'].map(f => (
-                    <span key={f} style={{
-                      background: C.gray100, color: C.gray500,
-                      fontSize: 10, fontWeight: 500, padding: '3px 9px', borderRadius: 99,
-                    }}>{f}</span>
-                  ))}
-                </div>
+  {/* Identity row */}
+  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+    <div style={{
+      width: 38, height: 38, borderRadius: '50%',
+      background: 'rgba(15,110,86,0.1)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontWeight: 700, fontSize: 14, color: C.teal, flexShrink: 0,
+    }}>
+      {(JSON.parse(localStorage.getItem('userData') || '{}')?.name || 'E')
+        .split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+    </div>
+    <div>
+      <div style={{ fontWeight: 600, fontSize: 14, color: C.gray900 }}>
+        Welcome back, {JSON.parse(localStorage.getItem('userData') || '{}')?.name || 'Employer'}
+      </div>
+    </div>
+  </div>
 
-                <PreviewRow title={t.employerYourHomeProfile || 'Your home profile'}
-                  meta="Complete details to get better matches"
-                  tags={['Address', 'Preferences']} pill="In progress" pillType="progress" />
-                <PreviewRow title="Active job posts"
-                  meta="Requirements you have posted"
-                  tags={['Open', 'Matched']} pill="2 active" pillType="active" />
-                <PreviewRow title="Saved workers"
-                  meta="Workers you hired or liked before"
-                  tags={['Trusted', 'Hire again']} pill="0 saved" pillType="neutral" />
-              </div>
+  {/* Info rows */}
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
+      padding: '10px 12px', background: C.gray50 || '#F9FAFB', borderRadius: 12,
+    }}>
+      <span style={{ fontSize: 16 }}>📍</span>
+      <div>
+        <div style={{ fontSize: 11, color: C.gray400 || '#9CA3AF' }}>Location</div>
+        <div style={{ fontSize: 13, color: C.gray900, marginTop: 1 }}>
+          {JSON.parse(localStorage.getItem('userData') || '{}')?.city || 'Not added'}
+        </div>
+      </div>
+    </div>
+
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
+      padding: '10px 12px', background: C.gray50 || '#F9FAFB', borderRadius: 12,
+    }}>
+      <span style={{ fontSize: 16 }}>📞</span>
+      <div>
+        <div style={{ fontSize: 11, color: C.gray400 || '#9CA3AF' }}>Phone</div>
+        <div style={{ fontSize: 13, color: C.gray900, marginTop: 1 }}>
+          {JSON.parse(localStorage.getItem('userData') || '{}')?.phone || 'Not available'}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style={{
+    fontSize: 12, lineHeight: 1.6, color: C.gray500 || '#6B7280',
+    marginTop: 14, paddingTop: 12, borderTop: `1px solid ${C.gray100}`,
+  }}>
+    Thank you for using KaamWali.AI to connect with trusted domestic workers.
+  </div>
+</div>
             </div>
 
           </div>

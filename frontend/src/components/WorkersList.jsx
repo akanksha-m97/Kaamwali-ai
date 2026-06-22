@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE } from '../api';
 import { useLanguage } from '../contexts/LanguageContext';
+import EmployerHeader from './EmployerHeader';
 import { getFilterOptions } from '../filterOptions';
 
 export default function WorkersList() {
@@ -196,52 +197,7 @@ export default function WorkersList() {
   return (
     <>
       {/* ===== HEADER ===== */}
-      <header style={{
-        background: '#fff', borderBottom: '1px solid #E5E7EB',
-        position: 'sticky', top: 0, zIndex: 100,
-        boxShadow: '0 1px 8px rgba(0,0,0,0.08)',
-      }}>
-        <div style={{
-          maxWidth: 1140, margin: '0 auto', padding: '0 20px',
-          height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        }}>
-          <div onClick={() => navigate('/employer-dashboard')} style={{
-            fontSize: 20, fontWeight: 800, color: '#0F2F30', cursor: 'pointer', letterSpacing: '0.02em'
-          }}>
-            KaamWali<span style={{ color: '#2E7D5E' }}>.AI</span>
-          </div>
-
-          <nav style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button
-              type="button"
-              onClick={() => navigate('/employer-dashboard')}
-              style={{
-                border: 'none', background: 'transparent', color: '#2E7D5E',
-                fontSize: 14, fontWeight: 700, cursor: 'pointer', padding: '8px 12px',
-              }}
-              onMouseEnter={e => e.currentTarget.style.color = '#1D5F47'}
-              onMouseLeave={e => e.currentTarget.style.color = '#2E7D5E'}
-            >
-              For Employers
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigate('/feedback')}
-              style={{
-                background: '#2E7D5E', color: '#fff', border: 'none',
-                borderRadius: 10, padding: '10px 20px', fontWeight: 700,
-                fontSize: 14, cursor: 'pointer', boxShadow: '0 6px 18px rgba(46,125,94,0.32)',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = '#235F48'}
-              onMouseLeave={e => e.currentTarget.style.background = '#2E7D5E'}
-            >
-              Feedback
-            </button>
-          </nav>
-        </div>
-      </header>
-
+      <EmployerHeader activePath="/for-employers" />
       {/* ===== PAGE CONTENT ===== */}
       <div style={{ background: theme.bg, minHeight: '100vh', paddingBottom: 40 }}>
         <style>{`
@@ -642,52 +598,7 @@ export default function WorkersList() {
                               {w.isHired ? 'Hired' : 'Available'}
                             </span>
 
-                            {/* ← NEW: RECOMMENDATION BADGE */}
-                            {w.candidateScore && (
-                              <span
-                                style={{
-                                  fontSize: 10,
-                                  fontWeight: 700,
-                                  padding: '2px 6px',
-                                  borderRadius: 4,
-                                  background: w.candidateScore >= 80 ? '#DCFCE7' : w.candidateScore >= 60 ? '#FEF08A' : '#FECACA',
-                                  color: w.candidateScore >= 80 ? '#166534' : w.candidateScore >= 60 ? '#B45309' : '#DC2626',
-                                }}
-                                title={`Recommendation Score: ${Math.round(w.candidateScore)}`}
-                              >
-                                {w.candidateScore >= 80 ? '🌟 Top Match' : w.candidateScore >= 60 ? '⭐ Recommended' : '✓ Consider'}
-                              </span>
-                            )}
-
-                            {/* ← VERIFICATION BADGES */}
-                            {w.verificationLevel === 'police' && (
-                              <span
-                                style={{
-                                  fontSize: 10,
-                                  padding: '2px 6px',
-                                  borderRadius: 4,
-                                  background: '#DCFCE7',
-                                  color: '#166534',
-                                  fontWeight: 700,
-                                }}
-                              >
-                                Police Verified
-                              </span>
-                            )}
-                            {w.verificationLevel === 'id' && (
-                              <span
-                                style={{
-                                  fontSize: 10,
-                                  padding: '2px 6px',
-                                  borderRadius: 4,
-                                  background: '#DBEAFE',
-                                  color: '#1E40AF',
-                                  fontWeight: 700,
-                                }}
-                              >
-                                ID Verified
-                              </span>
-                            )}
+                          
                             {w.employerRiskLevel === 'HIGH' && (
                               <span
                                 style={{
@@ -819,9 +730,7 @@ export default function WorkersList() {
                                     ? 'Risky'
                                     : 'Average'}
                                 </span>
-                                {typeof w.trustMeta.rehireProbability === 'number' && (
-                                  <> · Rehire {(w.trustMeta.rehireProbability * 100).toFixed(0)}%</>
-                                )}
+                               
                               </div>
                             )}
 
@@ -855,36 +764,14 @@ export default function WorkersList() {
                                 })()}
                               </div>
                             )}
-
-                            {/* ← NEW: Recommendation Score */}
-                            {w.candidateScore && w.cumulativeSafetyScore !== undefined && (
-                              <div style={{ 
-                                marginTop: 8,
-                                padding: '6px 8px',
-                                background: '#F0F9F6',
-                                borderRadius: 6,
-                                fontSize: 11,
-                                fontWeight: 700,
-                                color: theme.primary,
-                                textAlign: 'center',
-                              }}>
-                                <div>Match Score: {Math.round(w.candidateScore)}/100</div>
-                                <div>Safety: {Math.round(w.cumulativeSafetyScore)}/100</div>
-                                {typeof w.safetyScore === 'number' && (
-                                  <div>Worker Safety Score: {Math.round(w.safetyScore)}/100</div>
-                                )}
-                                {w.currentEmployerPhone && (
-                                  <div>Employer Risk: {w.employerRiskLevel || 'LOW'}</div>
-                                )}
-                              </div>
-                            )}
                           </div>
                         </div>
 
                         <button
                           onClick={() => handleViewResume(w)}
                           style={{
-                            width: 'auto', marginTop: 2, marginLeft: 'auto',
+                            width: 'auto', marginTop: 8, marginBottom: 8,
+                            marginLeft: 'auto', marginRight: 'auto',
                             border: 'none', background: theme.primary, color: '#fff',
                             borderRadius: 8, padding: '8px 16px', fontWeight: 700,
                             fontSize: 12, cursor: 'pointer', boxShadow: '0 4px 10px rgba(46,125,94,0.18)',

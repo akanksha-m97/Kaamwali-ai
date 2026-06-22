@@ -1,6 +1,7 @@
 // frontend/src/components/VoiceOnboarding.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import WorkerHeader from './WorkerHeader';
 import { useSpeechToText } from '../hooks/useSpeechToText';
 import { API_BASE, completeWorkerProfile, getMetrics } from '../api';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -451,22 +452,12 @@ const VoiceOnboarding = ({ onProfileReady }) => {
   );
 
   return (
+     <>
+    <WorkerHeader activePath="/worker-onboard" />
     <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',background:G.pageBg,fontFamily:"system-ui,-apple-system,'Segoe UI',Roboto,sans-serif",color:G.text}}>
       <style>{KF}</style>
 
-      {/* Topbar */}
-      <div style={{background:'#1a2e22',color:'#d1fae5',fontSize:12,textAlign:'center',padding:'6px 16px'}}>
-        {metrics
-          ? `${metrics.workersCount} ${t.taglineWorkersCount || 'women onboarded'} · ${metrics.employersCount} ${t.taglineEmployersCount || 'homes reached'}`
-          : (t.tagline || '25 women onboarded · 0 homes reached')}
-      </div>
-
-      {/* Nav */}
-      <header style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 48px',height:64,background:'#fff',borderBottom:'1px solid #e5e7eb',position:'sticky',top:0,zIndex:10,boxShadow:'0 1px 6px rgba(0,0,0,0.04)'}}>
-        <div style={{fontSize:20,fontWeight:800,color:'#111827',letterSpacing:'-0.5px',cursor:'pointer'}} onClick={()=>navigate('/worker-dashboard')}>
-          KaamWali.<span style={{color:'#16a34a'}}>AI</span>
-        </div>
-      </header>
+     
 
       {/* Main two-col card */}
       <div style={{flex:1,padding:'12px 20px 16px'}}>
@@ -486,6 +477,7 @@ const VoiceOnboarding = ({ onProfileReady }) => {
         </div>
       </div>
     </div>
+      </>
   );
 };
 
