@@ -312,7 +312,7 @@ export default function WorkersList() {
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <label style={{ fontSize: 12, fontWeight: 700, color: theme.text, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                  City / Area
+                  {filterOptions.fieldLabels.city}
                 </label>
                 <select
                   name="cityArea"
@@ -336,7 +336,7 @@ export default function WorkersList() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <label style={{ fontSize: 12, fontWeight: 700, color: theme.text, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                  Skill
+                  {filterOptions.fieldLabels.skill}
                 </label>
                 <select
                   name="skill"
@@ -361,7 +361,7 @@ export default function WorkersList() {
               {/* ← NEW: Verification Filter */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <label style={{ fontSize: 12, fontWeight: 700, color: theme.text, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                  Verification Level
+                  {filterOptions.fieldLabels.verification}
                 </label>
                 <select
                   name="verification"
@@ -409,7 +409,7 @@ export default function WorkersList() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <label style={{ fontSize: 12, fontWeight: 700, color: theme.text, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                  Max Salary
+                  {filterOptions.fieldLabels.salary}
                 </label>
                 <select
                   name="maxSalary"
@@ -481,7 +481,7 @@ export default function WorkersList() {
                 onMouseEnter={(e) => { e.currentTarget.style.background = theme.primaryHover; e.currentTarget.style.transform = 'translateY(-1px)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = theme.primary; e.currentTarget.style.transform = 'translateY(0)'; }}
               >
-                Search workers
+                {filterOptions.fieldLabels.search}
               </button>
             </form>
           </div>
@@ -575,7 +575,7 @@ export default function WorkersList() {
           )}
 
             <p style={{ color: theme.secondary }}>No workers found yet. Ask a worker to create a profile first.</p>
-          )}
+          
 
           <div style={{ display: 'grid', gap: 14 }}>
             {workers.map((w) => {

@@ -17,14 +17,14 @@ export const useLanguage = () => {
 };
 
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('kaamwali-language') || 'en';
+    }
+    return 'en';
+  });
   const [messages, setMessages] = useState({});
   const [loadingTranslations, setLoadingTranslations] = useState(false);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('kaamwali-language');
-    if (saved) setLanguage(saved);
-  }, []);
 
   useEffect(() => {
     localStorage.setItem('kaamwali-language', language);

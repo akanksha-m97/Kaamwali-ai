@@ -11,6 +11,7 @@ import './styles/main.css';
 import Landing from './components/Landing';
 import VoiceOnboarding from './components/VoiceOnboarding';
 import WorkerProfile from './components/WorkerProfile';
+import WorkerResumeSummary from './components/WorkerResumeSummary';
 import WorkersList from './components/WorkersList';
 import AuthPage from './components/AuthPage';
 import WorkerDashboard from './components/WorkerDashboard';
@@ -18,6 +19,7 @@ import EmployerDashboard from './components/EmployerDashboard';
 import Feedback from './components/Feedback';
 import { getMetrics } from './api';
 import { LanguageProvider } from './contexts/LanguageContext';
+
 
 /* ---------- MAIN APP CONTENT (after login) ---------- */
 
@@ -37,13 +39,25 @@ const AppContent = () => {
     const pathToMode = {
       '/app': 'landing',
       '/worker-onboard': 'worker-onboard',
-      '/worker-profile': 'worker-profile'
+      '/worker-resume': 'worker-resume',
+      '/worker-profile': 'worker-profile',
     };
 
     if (pathToMode[window.location.pathname]) {
       setMode(pathToMode[window.location.pathname]);
     }
   }, []);
+
+  useEffect(() => {
+    if (mode !== 'worker-resume') return;
+    const saved = sessionStorage.getItem('completedWorker');
+    if (!saved || worker) return;
+    try {
+      setWorker(JSON.parse(saved));
+    } catch {
+      sessionStorage.removeItem('completedWorker');
+    }
+  }, [mode, worker]);
 
   const handleWorkerFlowStart = () => {
     setMode('worker-onboard');
@@ -57,13 +71,17 @@ const AppContent = () => {
 
   const handleProfileReady = (newWorker) => {
     setWorker(newWorker);
-    setMode('worker-profile');
-    navigate('/worker-profile');
+    sessionStorage.setItem('completedWorker', JSON.stringify(newWorker));
+    setMode('worker-resume');
+    navigate('/worker-resume');
     getMetrics().then(setMetrics).catch(() => {});
   };
 
+  const showTopbar = mode === 'landing';
+
   return (
     <div>
+      {showTopbar && (
       <header className="topbar">
         <div className="topbar-logo">KaamWali.AI</div>
         <div className="topbar-right">
@@ -76,6 +94,7 @@ const AppContent = () => {
           )}
         </div>
       </header>
+      )}
 
       <main className="page">
         {mode === 'landing' && (
@@ -87,13 +106,13 @@ const AppContent = () => {
 
         {mode === 'worker-onboard' && (
           <div className="layout">
-            <VoiceOnboarding onProfileReady={handleProfileReady} />
+            <VoiceOnboarding onProfileReady={handleProfileReady} />       
           </div>
         )}
 
-        {mode === 'worker-profile' && (
+        {mode === 'worker-resume' && (
           <div className="layout">
-            <WorkerProfile
+            <WorkerResumeSummary
               worker={worker}
               onBack={() => {
                 setMode('worker-onboard');
@@ -101,6 +120,14 @@ const AppContent = () => {
               }}
             />
           </div>
+        )}
+        {mode === 'worker-profile' && (
+          <WorkerProfile
+            onBack={() => {
+              setMode('worker-onboard');
+              navigate('/worker-onboard');
+            }}
+          />
         )}
       </main>
     </div>
@@ -166,12 +193,13 @@ const AppRoutes = () => {
               : <AuthPage onAuthSuccess={handleAuthSuccess} />
           }
         />
-
+  
         <Route path="/for-employers" element={<WorkersList />} />
         <Route path="/feedback" element={<Feedback />} />
 
         <Route path="/app" element={<AppContent />} />
         <Route path="/worker-onboard" element={<AppContent />} />
+        <Route path="/worker-resume" element={<AppContent />} />
         <Route path="/worker-profile" element={<AppContent />} />
 
         <Route path="*" element={<AuthPage onAuthSuccess={handleAuthSuccess} />} />

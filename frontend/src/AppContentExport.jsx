@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Landing from './components/Landing';
 import VoiceOnboarding from './components/VoiceOnboarding';
 import WorkerProfile from './components/WorkerProfile';
+import WorkerResumeSummary from './components/WorkerResumeSummary';
 import WorkersList from './components/WorkersList';
 import { getMetrics } from './api';
 
@@ -26,6 +27,7 @@ const AppContent = ({ initialMode = 'landing' }) => {
     const pathToMode = {
       '/app': 'landing',
       '/worker-onboard': 'worker-onboard',
+      '/worker-resume': 'worker-resume',
       '/worker-profile': 'worker-profile',
       '/employers': 'employer'
     };
@@ -47,8 +49,9 @@ const AppContent = ({ initialMode = 'landing' }) => {
 
   const handleProfileReady = (newWorker) => {
     setWorker(newWorker);
-    setMode('worker-profile');
-    navigate('/worker-profile');
+    sessionStorage.setItem('completedWorker', JSON.stringify(newWorker));
+    setMode('worker-resume');
+    navigate('/worker-resume');
     getMetrics().then(setMetrics).catch(() => {});
   };
 
@@ -87,10 +90,21 @@ const AppContent = ({ initialMode = 'landing' }) => {
           </div>
         )}
 
+        {mode === 'worker-resume' && (
+          <div className="layout">
+            <WorkerResumeSummary
+              worker={worker}
+              onBack={() => {
+                setMode('worker-onboard');
+                navigate('/worker-onboard');
+              }}
+            />
+          </div>
+        )}
+
         {mode === 'worker-profile' && (
           <div className="layout">
             <WorkerProfile
-              worker={worker}
               onBack={() => {
                 setMode('worker-onboard');
                 navigate('/worker-onboard');

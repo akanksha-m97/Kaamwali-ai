@@ -10,7 +10,8 @@ import generateWorkerPDF from './generateWorkerPDF.js';
 import {
   extractInitialDraft,
   updateDraftWithField,
-  calculateTrustScore
+  calculateTrustScore,
+  getInitialOnboardingQueue
 } from './profileParser.js';
 import { connectDB } from './db.js';
 import i18nRouter from './routes/i18n.js';
@@ -207,6 +208,8 @@ function extractNameFromAadhaarText(text) {
 }
 
 const app = express();
+process.on('uncaughtException',  (err) => console.error('UNCAUGHT EXCEPTION:', err));
+process.on('unhandledRejection', (err) => console.error('UNHANDLED REJECTION:', err));
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/api', i18nRouter);
@@ -709,8 +712,9 @@ app.post('/api/worker/verify', async (req, res) => {
 
 app.post('/api/workers/:id/generate-pdf', async (req, res) => {
   const { id } = req.params;
+  const { language = 'en' } = req.body || {};
 
-  console.log('✅ request received for /api/workers/:id/generate-pdf');
+  console.log('✅ request received for /api/workers/:id/generate-pdf with language:', language);
 
   let worker;
   if (workersCollection) {
@@ -726,8 +730,8 @@ app.post('/api/workers/:id/generate-pdf', async (req, res) => {
     const pdfFilename = `worker_${id}_${timestamp}.pdf`;
     const pdfPath = path.join(uploadsDir, pdfFilename);
 
-    // Generate PDF using the template
-    await generateWorkerPDF(worker, pdfPath);
+    // Generate PDF using the template with language
+    await generateWorkerPDF(worker, pdfPath, language);
 
     const pdfUrlPath = `/uploads/${pdfFilename}`;
 
@@ -757,6 +761,34 @@ const pdfStorage = multer.diskStorage({
   },
 });
 const uploadPdf = multer({ storage: pdfStorage });
+
+app.post('/api/workers/:id/upload-photo', upload.single('file'), async (req, res) => {
+  const { id } = req.params;
+
+  if (!req.file) {
+    return res.status(400).json({ error: 'No photo file uploaded' });
+  }
+
+  let worker;
+  if (workersCollection) {
+    worker = await workersCollection.findOne({ _id: new ObjectId(id) });
+  } else {
+    worker = workers.find(w => String(w._id) === String(id));
+  }
+  if (!worker) return res.status(404).json({ error: 'Worker not found' });
+
+  const photoPath = req.file.path;
+  const photoUrlPath = `/uploads/verification/${path.basename(photoPath)}`;
+
+  await workersCollection.updateOne(
+    { _id: worker._id },
+    {
+      $set: { photoUrl: photoUrlPath },
+    }
+  );
+
+  res.json({ photoUrl: photoUrlPath });
+});
 
 app.post('/api/workers/:id/upload-pdf', uploadPdf.single('file'), async (req, res) => {
   const { id } = req.params;
@@ -1150,13 +1182,18 @@ function createSessionId() {
 
 /* ------------------ WORKER ONBOARDING ------------------ */
 
+function getSessionDraft(session) {
+  return session?.draft ?? session;
+}
+
 // 1️⃣ Start profile
 app.post('/api/profile/start', (req, res) => {
   const { text } = req.body || {};
   const sessionId = createSessionId();
 
-  const { draft, missingFields } = extractInitialDraft(text || '');
-  sessions.set(sessionId, draft);
+  const { draft } = extractInitialDraft(text || '');
+  const missingFields = getInitialOnboardingQueue();
+  sessions.set(sessionId, { draft, missingFields });
 
   res.json({ sessionId, draft, missingFields });
 });
@@ -1169,14 +1206,17 @@ app.post('/api/profile/answer', (req, res) => {
     return res.status(400).json({ error: 'Invalid sessionId' });
   }
 
-  const currentDraft = sessions.get(sessionId);
+  const session = sessions.get(sessionId);
+  const currentDraft = getSessionDraft(session);
+  const fieldQueue = session.missingFields || getInitialOnboardingQueue();
   const { draft, missingFields } = updateDraftWithField(
     currentDraft,
     field,
-    answerText || ''
+    answerText || '',
+    fieldQueue
   );
 
-  sessions.set(sessionId, draft);
+  sessions.set(sessionId, { draft, missingFields });
   res.json({ sessionId, draft, missingFields });
 });
 
@@ -1223,7 +1263,7 @@ app.post('/api/profile/complete', async (req, res) => {
 
   let draft;
   if (sessionId && sessions.has(sessionId)) {
-    draft = sessions.get(sessionId);
+    draft = getSessionDraft(sessions.get(sessionId));
   } else if (directDraft) {
     draft = directDraft;
   } else {
@@ -1231,6 +1271,17 @@ app.post('/api/profile/complete', async (req, res) => {
   }
 
   const trustScore = calculateTrustScore(draft);
+
+  let signupUser = null;
+  if (workerPhone) {
+    signupUser = await usersCollection.findOne({ phone: workerPhone, role: 'worker' });
+  }
+  
+  if (signupUser && signupUser.name) {
+    draft.name = signupUser.name;
+  } else {
+    draft.name = draft.name || 'Worker';
+  }
 
   // Check for existing ID verification and validate name/location
   let existingWorker = null;
@@ -1248,16 +1299,23 @@ app.post('/api/profile/complete', async (req, res) => {
     const voiceName = (draft.name || '').toLowerCase().trim();
     const idName = existingWorker.idName.toLowerCase().trim();
 
-    // Simple name similarity check
-    const voiceFirstName = voiceName.split(' ')[0];
-    const idFirstName = idName.split(' ')[0];
+    if (voiceName) {
+      // Simple name similarity check
+      const voiceFirstName = voiceName.split(' ')[0];
+      const idFirstName = idName.split(' ')[0];
 
-    if (!voiceName.includes(idFirstName) && !idName.includes(voiceFirstName)) {
-      return res.status(400).json({
-        error: 'Voice-recorded name does not match government ID name. Please check.',
-        hint: 'Make sure you pronounce your full name exactly as written on your ID.',
-        idName: existingWorker.idName
-      });
+      if (!voiceName.includes(idFirstName) && !idName.includes(voiceFirstName)) {
+        console.warn('Name mismatch between ID and voice-recorded data:', {
+          idName: existingWorker.idName,
+          voiceName: draft.name,
+        });
+        // For now, just log - don't block profile completion
+        // return res.status(400).json({
+        //   error: 'Voice-recorded name does not match government ID name. Please check.',
+        //   hint: 'Make sure you pronounce your full name exactly as written on your ID.',
+        //   idName: existingWorker.idName,
+        // });
+      }
     }
 
     // Optional: location validation
@@ -1270,7 +1328,7 @@ app.post('/api/profile/complete', async (req, res) => {
         console.warn('Location mismatch between ID and voice-recorded data:', {
           idLocation: existingWorker.idLocation,
           voiceCity: draft.city,
-          voiceArea: draft.cityArea
+          voiceArea: draft.cityArea,
         });
         // For now, just log - you can make this stricter later
       }
@@ -1646,6 +1704,34 @@ app.post('/api/verify-emergency-contact', async (req, res) => {
   }
 });
 
+app.patch('/api/users/:phone', async (req, res) => {
+  try {
+    const { phone } = req.params;
+    const { email, name, photoUrl, city } = req.body;
+
+    const updateData = {};
+    if (email !== undefined) updateData.email = email;
+    if (name !== undefined) updateData.name = name;
+    if (photoUrl !== undefined) updateData.photoUrl = photoUrl;
+    if (city !== undefined) updateData.city = city;
+
+    const result = await usersCollection.updateOne(
+      { phone },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const updatedUser = await usersCollection.findOne({ phone });
+    res.json({ message: 'User updated successfully', user: updatedUser });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
 app.post('/api/login', async (req, res) => {
   try {
     const { phone, password, role } = req.body;
@@ -1838,13 +1924,20 @@ app.get('/api/workers/by-phone/:phone', async (req, res) => {
   try {
     const { phone } = req.params;
 
-    const worker = await workersCollection.findOne(getWorkerLookupFilter(phone));
+    const worker = await workersCollection.findOne({
+  $or: [
+    { phone: phone },
+    { emergencyContact: phone },
+    { 'safety.emergencyContact': phone },
+  ],
+});
 
     if (!worker) {
       return res.status(404).json({ message: 'Worker not found' });
     }
 
     res.json({
+      _id: worker._id,
       name: worker.name,
       role: worker.role || worker.workType || 'Housekeeper',
       emergencyContact: worker.emergencyContact || worker.safety?.emergencyContact,
@@ -1856,6 +1949,20 @@ app.get('/api/workers/by-phone/:phone', async (req, res) => {
       city: worker.city || null,
       cityArea: worker.cityArea || null,
       verificationLevel: worker.verificationLevel || 'unverified',
+      trustScore: worker.trustScore || 0,
+      safetyIncidents: worker.safetyIncidents || 0,
+      experienceYears: worker.experienceYears,
+      expectedSalary: worker.expectedSalary,
+      workType: worker.workType,
+      daysOff: worker.daysOff,
+      skills: worker.skills || [],
+      languages: worker.languages || [],
+      languageProfile: worker.languageProfile,
+      bio: worker.bio,
+      photoUrl: worker.photoUrl,
+      createdAt: worker.createdAt,
+      uploadedPdfUrl: worker.uploadedPdfUrl,
+      generatedPdfUrl: worker.generatedPdfUrl,
     });
   } catch (error) {
     console.error('Error fetching worker:', error);
@@ -2875,6 +2982,57 @@ const PORT = process.env.PORT || 4000;
     usersCollection = null;
     tempOtpCollection = null;
   }
+
+ app.patch('/api/workers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+ 
+    // Only allow safe fields to be updated — never overwrite trust/verification
+    const {
+      experienceYears,
+      expectedSalary,
+      workType,
+      daysOff,
+      medicalConditions,
+      availability,
+      skills,
+      languages,
+    } = req.body || {};
+ 
+    const updateFields = {};
+    if (experienceYears  !== undefined) updateFields.experienceYears  = experienceYears;
+    if (expectedSalary   !== undefined) updateFields.expectedSalary   = expectedSalary;
+    if (workType         !== undefined) updateFields.workType         = workType;
+    if (daysOff          !== undefined) updateFields.daysOff          = daysOff;
+    if (medicalConditions !== undefined) updateFields.medicalConditions = medicalConditions;
+    if (availability     !== undefined) updateFields.availability     = availability;
+    if (skills           !== undefined) updateFields.skills           = skills;
+    if (languages        !== undefined) updateFields.languages        = languages;
+ 
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({ error: 'No valid fields to update' });
+    }
+ 
+    updateFields.updatedAt = new Date().toISOString();
+ 
+    const result = await workersCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateFields }
+    );
+ 
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Worker not found' });
+    }
+ 
+    const updated = await workersCollection.findOne({ _id: new ObjectId(id) });
+    res.json({ message: 'Worker updated successfully', worker: updated });
+ 
+  } catch (err) {
+    console.error('PATCH /api/workers/:id error:', err);
+    res.status(500).json({ error: 'Failed to update worker' });
+  }
+});
+ 
 
   app.listen(PORT, () => {
     console.log(`Backend running on ${PORT}`);

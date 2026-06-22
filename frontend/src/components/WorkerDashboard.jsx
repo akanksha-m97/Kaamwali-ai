@@ -19,7 +19,7 @@ const WorkerDashboard = () => {
   const [verifyForm, setVerifyForm] = useState({ workerPhone: '', docType: 'id' });
   const [message, setMessage]           = useState('');
   const [verifyMessage, setVerifyMessage] = useState('');
-  const fileInputRef = useRef(null);
+
 
   const { messages } = useLanguage();
   const t = (messages && messages.workerDashboard) || {};
@@ -262,6 +262,13 @@ const WorkerDashboard = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('userData');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('workerPhone');
+    navigate('/');
+  };
+
   const statusLabel = status === 'hired' ? 'Hired (currently working)' : status === 'available' ? 'Available for work' : 'Status unknown';
   const statusColor = status === 'hired' ? '#B91C1C' : status === 'available' ? '#166534' : '#6B7280';
   const statusBg    = status === 'hired' ? '#FEE2E2' : status === 'available' ? '#DCFCE7' : '#E5E7EB';
@@ -393,6 +400,7 @@ const WorkerDashboard = () => {
             <button className="wd-nav-link" onClick={() => navigate('/worker-profile')}>{t.myProfile || 'My Profile'}</button>
             <button className="wd-nav-link" onClick={() => navigate('/worker-onboard')}>{t.workOpportunities || 'Work Opportunities'}</button>
             <button className="wd-nav-cta"  onClick={() => navigate('/worker-onboard')}>{t.tryDemo || 'Try Demo'}</button>
+            <button className="wd-nav-link" onClick={handleLogout} style={{ background: '#fee2e2', color: '#dc2626' }}>{t.logout || 'Logout'}</button>
           </nav>
         </header>
 

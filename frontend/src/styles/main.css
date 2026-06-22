@@ -84,10 +84,118 @@ body {
   gap: 12px;
 }
 
-/* removed: .card, .card-title, .card-sub, .voice-controls, .hint, .textarea,
-   .btn, .btn-outline, .btn-small, .btn-primary, .btn-danger, .btn-whatsapp,
-   .text-small, .error-text, .btn[disabled]
-   (moved to voiceOnboarding.css) */
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+  border: 1px solid #e5e7eb;
+}
+
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.text-small {
+  font-size: 0.78rem;
+  color: #4b5563;
+  margin: 0 0 4px;
+}
+
+.btn {
+  border-radius: 8px;
+  border: none;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #16a34a;
+  color: #fff;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resume-summary-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  height: 64px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+}
+
+.resume-summary-logo {
+  font-size: 20px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.5px;
+  cursor: pointer;
+}
+
+.resume-summary-logo span {
+  color: #16a34a;
+}
+
+.resume-summary-nav-links {
+  display: flex;
+  gap: 0;
+}
+
+.resume-summary-nav-links button {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+
+.resume-summary-nav-links button.active {
+  background: #e5e7eb;
+}
+
+.resume-summary-grid {
+  max-width: 960px;
+  margin: 16px auto;
+  padding: 0 16px;
+}
+
+.resume-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.resume-badge-green {
+  background: #ecfdf5;
+  color: #166534;
+}
+
+.resume-badge-red {
+  background: #fee2e2;
+  color: #b91c1c;
+}
 
 .chip {
   display: inline-block;

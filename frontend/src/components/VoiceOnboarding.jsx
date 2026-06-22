@@ -1,5 +1,5 @@
 // frontend/src/components/VoiceOnboarding.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSpeechToText } from '../hooks/useSpeechToText';
 import { API_BASE, completeWorkerProfile, getMetrics } from '../api';
@@ -8,15 +8,46 @@ import { useLanguage } from '../contexts/LanguageContext';
 // ── Save your illustration as: src/assets/images/worker-illustration.png ──
 import workerIllustration from '../assets/images/worker-illustration.png';
 
-const NUMERIC_FIELDS = ['age', 'experienceYears', 'expectedSalary'];
+const ONBOARDING_QUESTION_COUNT = 10;
+const TOTAL_ONBOARDING_STEPS = ONBOARDING_QUESTION_COUNT + 1; // intro + 10 questions
+
+const NUMERIC_FIELDS = ['age', 'experienceYears', 'expectedSalary', 'daysOff'];
 const NON_NUMERIC_FIELDS = [
-  'name','skills','availability','workType','daysOff',
-  'medicalConditions','willingLateOrTravel','previousEmployerRef',
-  'comfortableWithFamilies','comfortableWithPets',
+  'skills','availability','workType',
+  'medicalConditions',
 ];
 const isNumericAnswer = (v) => /^[0-9]+$/.test(v.trim());
 const hasDigits       = (v) => /\d/.test(v);
 const isValidPhone10  = (v) => v.replace(/\D/g,'').length === 10;
+
+const prefillFromDraft = (field, draftData) => {
+  if (!field || !draftData) return '';
+  const val = draftData[field];
+  if (val == null) return '';
+  if (field === 'availability' && typeof val === 'object') {
+    const parts = [];
+    if (val.morning) parts.push('morning');
+    if (val.afternoon) parts.push('afternoon');
+    if (val.evening) parts.push('evening');
+    if (val.days) parts.push(val.days);
+    return parts.join(', ');
+  }
+  if (Array.isArray(val)) return val.join(', ');
+  return String(val);
+};
+
+const defaultQuestions = {
+  cityArea: 'Which city and area do you live in?',
+  age: 'What is your age?',
+  experienceYears: 'How many years of experience do you have?',
+  skills: 'What kind of work can you do? For example cooking, cleaning, babysitting.',
+  expectedSalary: 'What monthly salary do you expect?',
+  availability: 'When can you work — morning, afternoon, or evening?',
+  workType: 'Do you want full-time or part-time work?',
+  daysOff: 'How many days off do you want each week?',
+  medicalConditions: "Do you have any health conditions we should know about? You can say 'none'.",
+  emergencyContact: 'Who can we call in an emergency? Please say their name and phone number.',
+};
 
 const G = {
   dark:      '#1a3c34',
@@ -143,9 +174,10 @@ const VoiceOnboarding = ({ onProfileReady }) => {
   const { language, messages } = useLanguage();
   const { listening, text, setText, startListening, stopListening } = useSpeechToText(language);
   const v  = messages?.voiceOnboarding || {};
-  const q  = messages?.questions       || {};
+  const q  = { ...defaultQuestions, ...(messages?.questions || {}) };
   const t  = messages?.workerDashboard || {};
   const hi = language === 'hi';
+  const textareaRef = useRef(null);
   const [metrics, setMetrics] = useState(null);
   
   useEffect(() => {
@@ -158,14 +190,17 @@ const VoiceOnboarding = ({ onProfileReady }) => {
   const [currentField,        setCurrentField]        = useState(null);
   const [loading,             setLoading]             = useState(false);
   const [error,               setError]               = useState('');
-  const [initialMissingCount, setInitialMissingCount] = useState(0);
   const [fieldHistory,        setFieldHistory]        = useState([]);
 
   const handleProfileComplete = async (sessId, latestDraft) => {
     try {
       setStep('finalizing');
       const worker = await completeWorkerProfile(sessId||sessionId, latestDraft||draft);
-      onProfileReady(worker);
+      if (onProfileReady) {
+        onProfileReady(worker);
+      } else {
+        navigate('/worker-resume', { state: { worker }, replace: true });
+      }
     } catch(err) {
       console.error(err);
       const msg = hi?'प्रोफ़ाइल बनाने में समस्या आई।':'Error creating profile.';
@@ -180,10 +215,11 @@ const VoiceOnboarding = ({ onProfileReady }) => {
       const res  = await fetch(`${API_BASE}/api/profile/start`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
       const data = await res.json();
       setSessionId(data.sessionId); setDraft(data.draft);
-      setInitialMissingCount((data.missingFields||[]).length);
       if (data.missingFields?.length>0) {
-        setCurrentField(data.missingFields[0]); setFieldHistory([data.missingFields[0]]);
-        setStep('asking'); setText('');
+        const firstField = data.missingFields[0];
+        setCurrentField(firstField); setFieldHistory([firstField]);
+        setStep('asking');
+        setText(prefillFromDraft(firstField, data.draft));
       } else { await handleProfileComplete(data.sessionId,data.draft); }
     } catch(e) { console.error(e); setError(hi?'सर्वर में दिक्कत है।':'Server error – please try again.'); }
     finally { setLoading(false); }
@@ -201,7 +237,6 @@ const VoiceOnboarding = ({ onProfileReady }) => {
       const res  = await fetch(`${API_BASE}/api/profile/answer`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId,field:currentField,answerText:answer})});
       const data = await res.json();
       setDraft(data.draft);
-      if (initialMissingCount===0) setInitialMissingCount((data.missingFields||[]).length);
       setText('');
       if (data.missingFields?.length>0) {
         const next=data.missingFields[0]; setCurrentField(next); setFieldHistory(p=>[...p,next]);
@@ -219,10 +254,20 @@ const VoiceOnboarding = ({ onProfileReady }) => {
     });
   };
 
-  const total = initialMissingCount||1;
+  const total = ONBOARDING_QUESTION_COUNT;
   const done  = fieldHistory.length;
   const pct   = Math.min(Math.round((done/total)*100),100);
-  const totalSteps = initialMissingCount>0 ? initialMissingCount+1 : 4;
+  const totalSteps = TOTAL_ONBOARDING_STEPS;
+
+  useEffect(() => {
+    if (step === 'asking' || step === 'initial') {
+      textareaRef.current?.focus({ preventScroll: true });
+    }
+  }, [step, currentField]);
+
+  const questionText = currentField
+    ? q[currentField] || v.askingTitle || (hi?'कृपृया नीचे सवाल का जवाब दें।':'Please answer the question below.')
+    : '';
 
   /* ── LEFT PANEL: step badge on top, illustration fills rest ── */
   const LeftPanel = ({ stepNum }) => (
@@ -262,6 +307,9 @@ const VoiceOnboarding = ({ onProfileReady }) => {
             objectFit:'cover',
             objectPosition:'center bottom',
             display:'block',
+            transform:'none',
+            backfaceVisibility:'hidden',
+            willChange:'transform',
           }}
         />
       </div>
@@ -276,8 +324,9 @@ const VoiceOnboarding = ({ onProfileReady }) => {
         {label||(hi?'आपका बोला हुआ टेक्स्ट':'Your spoken text')}
       </p>
       <textarea
+        ref={textareaRef}
         value={text}
-        onChange={e=>setText(e.target.value)}
+        onChange={e => setText(e.target.value)}
         maxLength={1000}
         placeholder={hi?'आपका बोला हुआ टेक्स्ट यहाँ दिखेगा।':'Your spoken text will appear here so you can review it before continuing.'}
         style={{
@@ -374,7 +423,7 @@ const VoiceOnboarding = ({ onProfileReady }) => {
           <MicSection listening={listening} disabled={loading} onToggle={listening?stopListening:startListening} hi={hi}/>
             <div style={{background:G.light,border:`1px solid ${G.border}`,borderRadius:12,padding:'10px 14px',margin:'14px 0 0'}}>
             <p style={{fontSize:11,fontWeight:700,color:G.main,textTransform:'uppercase',letterSpacing:'0.07em',margin:'0 0 6px'}}>{hi?'सवाल':'Question'}</p>
-            <p style={{fontSize:15,fontWeight:600,color:G.text,margin:0,lineHeight:1.45}}>{q[currentField]||''}</p>
+            <p style={{fontSize:15,fontWeight:600,color:G.text,margin:0,lineHeight:1.45}}>{questionText}</p>
           </div>
           <SpokenTextArea label={hi?'आपका जवाब':'Your spoken text'}/>
         </div>

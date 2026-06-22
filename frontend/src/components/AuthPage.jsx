@@ -61,9 +61,9 @@ const AuthPage = ({ onAuthSuccess }) => {
       setFormData((prev) => ({ ...prev, otp: String(otp) }));
 
       setSignupStep('otp');
-      setStatusMessage('OTP sent to your phone (check console for auto-filled OTP)');
+      setStatusMessage(t.otpSent || 'OTP sent to your phone (check console for auto-filled OTP)');
     } catch (err) {
-      setStatusMessage(err.message || 'Failed to send OTP');
+      setStatusMessage(err.message || t.otpSendFailed || 'Failed to send OTP');
     }
   };
 
@@ -71,9 +71,9 @@ const AuthPage = ({ onAuthSuccess }) => {
     try {
       await firebaseVerifyOtp(formData.otp);
       setSignupStep('password');
-      setStatusMessage('Phone verified!');
+      setStatusMessage(t.phoneVerified || 'Phone verified!');
     } catch (err) {
-      setStatusMessage('Invalid OTP');
+      setStatusMessage(t.invalidOtp || 'Invalid OTP');
     }
   };
 
@@ -143,10 +143,10 @@ const AuthPage = ({ onAuthSuccess }) => {
 
   const signupButtonLabel =
     signupStep === 'details'
-      ? 'Send OTP'
+      ? t.sendOtpButton || 'Send OTP'
       : signupStep === 'otp'
-      ? 'Verify OTP'
-      : 'Set Password';
+      ? t.verifyOtpButton || 'Verify OTP'
+      : t.setPasswordButton || 'Set Password';
 
   return (
     <>
@@ -650,12 +650,12 @@ const AuthPage = ({ onAuthSuccess }) => {
                   {signupStep === 'otp' && (
                     <>
                       <div className="kw-field">
-                        <label className="kw-label">Enter OTP</label>
+                        <label className="kw-label">{t.otpLabel || 'Enter OTP'}</label>
                         <input
                           name="otp"
                           type="text"
                           className="kw-input"
-                          placeholder="6-digit OTP"
+                          placeholder={t.otpPlaceholder || '6-digit OTP'}
                           value={formData.otp}
                           onChange={handleChange}
                           required
@@ -663,7 +663,7 @@ const AuthPage = ({ onAuthSuccess }) => {
                       </div>
                       {devOtp && (
                         <div className="kw-otp-debug">
-                          <span>Your OTP</span>
+                          <span>{t.yourOtpLabel || 'Your OTP'}</span>
                           <strong>{devOtp}</strong>
                         </div>
                       )}
@@ -699,13 +699,13 @@ const AuthPage = ({ onAuthSuccess }) => {
                         try {
                           await sendOtp();
                         } catch (err) {
-                          setStatusMessage(err.message || 'Failed to resend OTP');
+                          setStatusMessage(err.message || t.resendOtpFailed || 'Failed to resend OTP');
                         } finally {
                           setSubmitting(false);
                         }
                       }}
                     >
-                      Resend OTP
+                      {t.resendOtpButton || 'Resend OTP'}
                     </button>
                   )}
                 </>

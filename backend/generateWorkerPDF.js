@@ -1,6 +1,6 @@
 import puppeteer from "puppeteer";
 import { workerResumeTemplate } from './templates/workerResumeTemplate.js';
-export default async function generateWorkerPDF(worker, outputPath) {
+export default async function generateWorkerPDF(worker, outputPath, language = 'en') {
   const browser = await puppeteer.launch({
     headless: "new",
     args: ["--no-sandbox", "--disable-setuid-sandbox"]
@@ -8,7 +8,7 @@ export default async function generateWorkerPDF(worker, outputPath) {
 
   const page = await browser.newPage();
 
-  const html = workerResumeTemplate(worker);
+  const html = workerResumeTemplate(worker, language);
 
   await page.setContent(html, { waitUntil: "networkidle0" });
 

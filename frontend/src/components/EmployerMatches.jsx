@@ -272,7 +272,7 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
               textTransform: 'uppercase',
               letterSpacing: '0.08em'
             }}>
-              City / Area
+              {filterOptions.fieldLabels.city}
             </label>
             <select
               name="cityArea"
@@ -306,7 +306,7 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
               textTransform: 'uppercase',
               letterSpacing: '0.08em'
             }}>
-              Skill
+              {filterOptions.fieldLabels.skill}
             </label>
             <select
               name="skill"
@@ -340,7 +340,7 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
               textTransform: 'uppercase',
               letterSpacing: '0.08em'
             }}>
-              Verification Level
+              {filterOptions.fieldLabels.verification}
             </label>
             <select
               name="verification"
@@ -374,7 +374,7 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
               textTransform: 'uppercase',
               letterSpacing: '0.08em'
             }}>
-              Min Experience (years)
+              {filterOptions.fieldLabels.experience}
             </label>
             <select
               name="minExp"
@@ -408,7 +408,7 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
               textTransform: 'uppercase',
               letterSpacing: '0.08em'
             }}>
-              Max Salary
+              {filterOptions.fieldLabels.salary}
             </label>
             <select
               name="maxSalary"
@@ -442,7 +442,7 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
               textTransform: 'uppercase',
               letterSpacing: '0.08em'
             }}>
-              Sort by Trust
+              {filterOptions.fieldLabels.sort}
             </label>
             <select
               name="sortByTrust"
@@ -483,7 +483,7 @@ const EmployerMatches = ({ workers: propWorkers, city: propCity }) => {
             cursor: 'pointer',
           }}
         >
-          Search workers
+          {filterOptions.fieldLabels.search}
         </button>
       </div>
 

@@ -3,6 +3,8 @@ const LABELS = {
     any: 'Any',
     allCities: 'All cities',
     allSkills: 'All skills',
+    searchByCity: 'Search by city and skill to see available matches',
+    showMatching: 'Show matching workers',
     city: {
       kurnool: 'Kurnool',
       bhiwani: 'Bhiwani',
@@ -94,6 +96,8 @@ const LABELS = {
     any: 'कोई भी',
     allCities: 'सभी शहर',
     allSkills: 'सभी कौशल',
+    searchByCity: 'शहर और कौशल द्वारा खोजें उपलब्ध मेल देखने के लिए',
+    showMatching: 'मेल खाने वाले कर्मचारी दिखाएं',
     city: { kurnool: 'कुरनूल', bhiwani: 'भिवानी', delhi: 'दिल्ली', hyderabad: 'हैदराबाद', mumbai: 'मुंबई', pune: 'पुणे', bengaluru: 'बेंगलुरु', chennai: 'चेन्नई', kolkata: 'कोलकाता', gurugram: 'गुरुग्राम', noida: 'नोएडा', ghaziabad: 'गाजियाबाद', faridabad: 'फरीदाबाद', lucknow: 'लखनऊ', kanpur: 'कानपुर', jaipur: 'जयपुर', ahmedabad: 'अहमदाबाद', surat: 'सूरत', vadodara: 'वडोदरा', indore: 'इंदौर', bhopal: 'भोपाल', nagpur: 'नागपुर', nashik: 'नाशिक', patna: 'पटना', ranchi: 'रांची', bhubaneswar: 'भुवनेश्वर', chandigarh: 'चंडीगढ़', amritsar: 'अमृतसर', ludhiana: 'लुधियाना', kochi: 'कोच्चि', thiruvananthapuram: 'तिरुवनंतपुरम', vijayawada: 'विजयवाड़ा', visakhapatnam: 'विशाखापट्टनम', warangal: 'वरंगल', tirupati: 'तिरुपति', coimbatore: 'कोयंबटूर', madurai: 'मदुरै', dehradun: 'देहरादून', guwahati: 'गुवाहाटी' },
     skill: { cooking: 'खाना बनाना', cleaning: 'सफाई', babysitting: 'बच्चों की देखभाल', eldercare: 'बुजुर्गों की देखभाल', laundry: 'कपड़े धोना', utensils: 'बर्तन धोना', mopping: 'पोछा लगाना', sweeping: 'झाड़ू लगाना', dusting: 'धूल साफ करना', bathroom_cleaning: 'बाथरूम सफाई', deep_cleaning: 'गहरी सफाई', kitchen_helper: 'रसोई सहायक', cooking_assistant: 'खाना बनाने में मदद', nanny: 'नैनी / आया', patient_care: 'मरीज की देखभाल', ironing: 'कपड़े प्रेस करना', gardening: 'बागवानी', pet_care: 'पालतू जानवरों की देखभाल', live_in_help: 'घर में रहने वाली मदद' },
     verification: { id: 'आईडी सत्यापित', police: 'पुलिस सत्यापित' },
@@ -105,6 +109,8 @@ const LABELS = {
     any: 'ఏదైనా',
     allCities: 'అన్ని నగరాలు',
     allSkills: 'అన్ని నైపుణ్యాలు',
+    searchByCity: 'చేసిన నిర్దిష్ట ఆలోచనలు చూడటానికి నగరం మరియు నైపుణ్యం ద్వారా శోధించండి',
+    showMatching: 'సరిపోలే కార్మికులను చూపించండి',
     city: { kurnool: 'కర్నూలు', bhiwani: 'భివాని', delhi: 'ఢిల్లీ', hyderabad: 'హైదరాబాద్', mumbai: 'ముంబై', pune: 'పూణే', bengaluru: 'బెంగళూరు', chennai: 'చెన్నై', kolkata: 'కోల్కతా', gurugram: 'గురుగ్రామ్', noida: 'నోయిడా', ghaziabad: 'ఘజియాబాద్', faridabad: 'ఫరీదాబాద్', lucknow: 'లక్నో', kanpur: 'కాన్పూర్', jaipur: 'జైపూర్', ahmedabad: 'అహ్మదాబాద్', surat: 'సూరత్', vadodara: 'వడోదర', indore: 'ఇండోర్', bhopal: 'భోపాల్', nagpur: 'నాగ్‌పూర్', nashik: 'నాశిక్', patna: 'పాట్నా', ranchi: 'రాంచీ', bhubaneswar: 'భువనేశ్వర్', chandigarh: 'చండీగఢ్', amritsar: 'అమృత్‌సర్', ludhiana: 'లూధియానా', kochi: 'కొచ్చి', thiruvananthapuram: 'తిరువనంతపురం', vijayawada: 'విజయవాడ', visakhapatnam: 'విశాఖపట్నం', warangal: 'వరంగల్', tirupati: 'తిరుపతి', coimbatore: 'కోయంబత్తూరు', madurai: 'మదురై', dehradun: 'డెహ్రాడూన్', guwahati: 'గువాహటి' },
     skill: { cooking: 'వంట', cleaning: 'శుభ్రపరచడం', babysitting: 'పిల్లల సంరక్షణ', eldercare: 'వృద్ధుల సంరక్షణ', laundry: 'బట్టలు ఉతకడం', utensils: 'గిన్నెలు కడగడం', mopping: 'నేల తుడవడం', sweeping: 'చీపురు వేయడం', dusting: 'దుమ్ము శుభ్రం', bathroom_cleaning: 'బాత్రూమ్ శుభ్రం', deep_cleaning: 'డీప్ క్లీనింగ్', kitchen_helper: 'వంటగది సహాయం', cooking_assistant: 'వంట సహాయం', nanny: 'నానీ / ఆయా', patient_care: 'రోగి సంరక్షణ', ironing: 'ఇస్త్రీ', gardening: 'తోట పని', pet_care: 'పెంపుడు జంతువుల సంరక్షణ', live_in_help: 'ఇంట్లో ఉండే సహాయం' },
     verification: { id: 'ID ధృవీకరించబడింది', police: 'పోలీస్ ధృవీకరణ' },
@@ -116,6 +122,8 @@ const LABELS = {
     any: 'ಯಾವುದಾದರೂ',
     allCities: 'ಎಲ್ಲಾ ನಗರಗಳು',
     allSkills: 'ಎಲ್ಲಾ ಕೌಶಲ್ಯಗಳು',
+    searchByCity: 'ಲಭ್ಯವಾದ ಹೊಂದಾಣಿಕೆಗಳನ್ನು ನೋಡಲು ನಗರ ಮತ್ತು ಕೌಶಲ್ಯದ ಮೂಲಕ ಹುಡುಕಿ',
+    showMatching: 'ಹೊಂದಾಣಿಕೆಯಾದ ಕೆಲಸಗಾರರನ್ನು ತೋರಿಸಿ',
     city: { kurnool: 'ಕುರ್ನೂಲ್', bhiwani: 'ಭಿವಾನಿ', delhi: 'ದೆಹಲಿ', hyderabad: 'ಹೈದರಾಬಾದ್', mumbai: 'ಮುಂಬೈ', pune: 'ಪುಣೆ', bengaluru: 'ಬೆಂಗಳೂರು', chennai: 'ಚೆನ್ನೈ', kolkata: 'ಕೊಲ್ಕತ್ತಾ', gurugram: 'ಗುರುಗ್ರಾಮ್', noida: 'ನೊಯ್ಡಾ', ghaziabad: 'ಘಾಜಿಯಾಬಾದ್', faridabad: 'ಫರೀದಾಬಾದ್', lucknow: 'ಲಖನೌ', kanpur: 'ಕಾನ್ಪುರ', jaipur: 'ಜೈಪುರ', ahmedabad: 'ಅಹಮದಾಬಾದ್', surat: 'ಸುರತ್', vadodara: 'ವಡೋದರಾ', indore: 'ಇಂದೋರ್', bhopal: 'ಭೋಪಾಲ್', nagpur: 'ನಾಗಪುರ', nashik: 'ನಾಶಿಕ್', patna: 'ಪಟ್ನಾ', ranchi: 'ರಾಂಚಿ', bhubaneswar: 'ಭುವನೇಶ್ವರ', chandigarh: 'ಚಂಡೀಗಢ', amritsar: 'ಅಮೃತಸರ', ludhiana: 'ಲುಧಿಯಾನಾ', kochi: 'ಕೊಚ್ಚಿ', thiruvananthapuram: 'ತಿರುವನಂತಪುರಂ', vijayawada: 'ವಿಜಯವಾಡ', visakhapatnam: 'ವಿಶಾಖಪಟ್ಟಣಂ', warangal: 'ವರಂಗಲ್', tirupati: 'ತಿರುಪತಿ', coimbatore: 'ಕೊಯಂಬತ್ತೂರು', madurai: 'ಮದುರೈ', dehradun: 'ಡೆಹ್ರಾಡೂನ್', guwahati: 'ಗುವಾಹಟಿ' },
     skill: { cooking: 'ಅಡುಗೆ', cleaning: 'ಸ್ವಚ್ಛತೆ', babysitting: 'ಮಕ್ಕಳ ಆರೈಕೆ', eldercare: 'ಹಿರಿಯರ ಆರೈಕೆ', laundry: 'ಬಟ್ಟೆ ತೊಳೆಯುವುದು', utensils: 'ಪಾತ್ರೆ ತೊಳೆಯುವುದು', mopping: 'ನೆಲ ಒರೆಸುವುದು', sweeping: 'ಜಾಡು ಹಾಕುವುದು', dusting: 'ಧೂಳು ಸ್ವಚ್ಛತೆ', bathroom_cleaning: 'ಬಾತ್‌ರೂಮ್ ಸ್ವಚ್ಛತೆ', deep_cleaning: 'ಆಳವಾದ ಸ್ವಚ್ಛತೆ', kitchen_helper: 'ಅಡುಗೆಮನೆ ಸಹಾಯ', cooking_assistant: 'ಅಡುಗೆ ಸಹಾಯಕ', nanny: 'ನಾನಿ / ಆಯಾ', patient_care: 'ರೋಗಿ ಆರೈಕೆ', ironing: 'ಇಸ್ತ್ರಿ', gardening: 'ತೋಟಗಾರಿಕೆ', pet_care: 'ಪೆಟ್ ಆರೈಕೆ', live_in_help: 'ಮನೆಯಲ್ಲಿ ವಾಸಿಸುವ ಸಹಾಯ' },
     verification: { id: 'ID ಪರಿಶೀಲಿಸಲಾಗಿದೆ', police: 'ಪೊಲೀಸ್ ಪರಿಶೀಲಿಸಲಾಗಿದೆ' },
@@ -127,6 +135,8 @@ const LABELS = {
     any: 'कोणतेही',
     allCities: 'सर्व शहरे',
     allSkills: 'सर्व कौशल्ये',
+    searchByCity: 'उपलब्ध जुळते पाहण्यासाठी शहर आणि कौशल्य द्वारा शोधा',
+    showMatching: 'जुळणारे कामगार दाखवा',
     city: { kurnool: 'कुरनूल', bhiwani: 'भिवानी', delhi: 'दिल्ली', hyderabad: 'हैदराबाद', mumbai: 'मुंबई', pune: 'पुणे', bengaluru: 'बेंगळुरू', chennai: 'चेन्नई', kolkata: 'कोलकाता', gurugram: 'गुरुग्राम', noida: 'नोएडा', ghaziabad: 'गाझियाबाद', faridabad: 'फरीदाबाद', lucknow: 'लखनौ', kanpur: 'कानपूर', jaipur: 'जयपूर', ahmedabad: 'अहमदाबाद', surat: 'सुरत', vadodara: 'वडोदरा', indore: 'इंदूर', bhopal: 'भोपाल', nagpur: 'नागपूर', nashik: 'नाशिक', patna: 'पाटणा', ranchi: 'रांची', bhubaneswar: 'भुवनेश्वर', chandigarh: 'चंदीगड', amritsar: 'अमृतसर', ludhiana: 'लुधियाना', kochi: 'कोची', thiruvananthapuram: 'तिरुवनंतपुरम', vijayawada: 'विजयवाडा', visakhapatnam: 'विशाखापट्टणम', warangal: 'वारंगल', tirupati: 'तिरुपती', coimbatore: 'कोयंबतूर', madurai: 'मदुराई', dehradun: 'देहरादून', guwahati: 'गुवाहाटी' },
     skill: { cooking: 'स्वयंपाक', cleaning: 'साफसफाई', babysitting: 'मुलांची काळजी', eldercare: 'वृद्धांची काळजी', laundry: 'कपडे धुणे', utensils: 'भांडी धुणे', mopping: 'फरशी पुसणे', sweeping: 'झाडू मारणे', dusting: 'धूळ साफ करणे', bathroom_cleaning: 'बाथरूम साफसफाई', deep_cleaning: 'डीप क्लीनिंग', kitchen_helper: 'स्वयंपाकघर मदत', cooking_assistant: 'स्वयंपाक मदतनीस', nanny: 'नॅनी / आया', patient_care: 'रुग्णांची काळजी', ironing: 'इस्त्री', gardening: 'बागकाम', pet_care: 'पाळीव प्राण्यांची काळजी', live_in_help: 'घरात राहणारी मदत' },
     verification: { id: 'ID सत्यापित', police: 'पोलीस सत्यापित' },
@@ -138,6 +148,8 @@ const LABELS = {
     any: 'যেকোনো',
     allCities: 'সব শহর',
     allSkills: 'সব দক্ষতা',
+    searchByCity: 'উপলব্ধ ম্যাচ দেখতে শহর এবং দক্ষতা দ্বারা সন্ধান করুন',
+    showMatching: 'মেলে এমন কর্মী দেখান',
     city: { kurnool: 'কুর্নুল', bhiwani: 'ভিওয়ানি', delhi: 'দিল্লি', hyderabad: 'হায়দরাবাদ', mumbai: 'মুম্বাই', pune: 'পুনে', bengaluru: 'বেঙ্গালুরু', chennai: 'চেন্নাই', kolkata: 'কলকাতা', gurugram: 'গুরগাঁও', noida: 'নয়ডা', ghaziabad: 'গাজিয়াবাদ', faridabad: 'ফরিদাবাদ', lucknow: 'লখনউ', kanpur: 'কানপুর', jaipur: 'জয়পুর', ahmedabad: 'আহমেদাবাদ', surat: 'সুরাট', vadodara: 'ভাদোদরা', indore: 'ইন্দোর', bhopal: 'ভোপাল', nagpur: 'নাগপুর', nashik: 'নাশিক', patna: 'পাটনা', ranchi: 'রাঁচি', bhubaneswar: 'ভুবনেশ্বর', chandigarh: 'চণ্ডীগড়', amritsar: 'অমৃতসর', ludhiana: 'লুধিয়ানা', kochi: 'কোচি', thiruvananthapuram: 'তিরুবনন্তপুরম', vijayawada: 'বিজয়ওয়াড়া', visakhapatnam: 'বিশাখাপত্তনম', warangal: 'ওয়ারাঙ্গল', tirupati: 'তিরুপতি', coimbatore: 'কোয়েম্বাটোর', madurai: 'মাদুরাই', dehradun: 'দেরাদুন', guwahati: 'গুয়াহাটি' },
     skill: { cooking: 'রান্না', cleaning: 'পরিষ্কার', babysitting: 'শিশুর যত্ন', eldercare: 'বয়স্কদের যত্ন', laundry: 'কাপড় ধোয়া', utensils: 'বাসন ধোয়া', mopping: 'মেঝে মোছা', sweeping: 'ঝাড়ু দেওয়া', dusting: 'ধুলো পরিষ্কার', bathroom_cleaning: 'বাথরুম পরিষ্কার', deep_cleaning: 'গভীর পরিষ্কার', kitchen_helper: 'রান্নাঘরের সাহায্য', cooking_assistant: 'রান্নার সহকারী', nanny: 'ন্যানি / আয়া', patient_care: 'রোগীর যত্ন', ironing: 'ইস্ত্রি', gardening: 'বাগান করা', pet_care: 'পোষা প্রাণীর যত্ন', live_in_help: 'লাইভ-ইন সাহায্য' },
     verification: { id: 'ID যাচাই করা', police: 'পুলিশ যাচাই করা' },
@@ -215,8 +227,75 @@ const SALARY_VALUES = ['', '5000', '8000', '10000', '15000', '20000'];
 const VERIFICATION_VALUES = ['', 'id', 'police'];
 const SORT_VALUES = ['yes', 'no'];
 
+const FIELD_LABELS = {
+  en: {
+    city: 'City / Area',
+    skill: 'Skill',
+    requiredSkill: 'Required skill',
+    verification: 'Verification Level',
+    experience: 'Min Experience (years)',
+    salary: 'Max Salary',
+    sort: 'Sort by Trust',
+    search: 'Search workers',
+  },
+  hi: {
+    city: 'शहर / क्षेत्र',
+    skill: 'कौशल',
+    requiredSkill: 'आवश्यक कौशल',
+    verification: 'सत्यापन स्तर',
+    experience: 'न्यूनतम अनुभव (साल)',
+    salary: 'अधिकतम वेतन',
+    sort: 'विश्वास के अनुसार क्रमबद्ध करें',
+    search: 'काम खोजें',
+  },
+  te: {
+    city: 'నగరం / ప్రాంతం',
+    skill: 'నైపుణ్యం',
+    requiredSkill: 'అవసరమైన నైపుణ్యం',
+    verification: 'ధృవీకరణ స్థాయి',
+    experience: 'కనీస అనుభవం (సంవత్సరాలు)',
+    salary: 'గరిష్ట జీతం',
+    sort: 'నమ్మకంతో వర్గీకరణ',
+    search: 'నౌకరి శోధన',
+  },
+  kn: {
+    city: 'ನಗರ / ಪ್ರದೇಶ',
+    skill: 'ಕೌಶಲ್ಯ',
+    requiredSkill: 'ಬೇಕಾದ ಕೌಶಲ್ಯ',
+    verification: 'ಸत्यೀಕರಣ ಮಟ್ಟ',
+    experience: 'ಕನಿಷ್ಠ ಅನುಭವ (ವರ್ಷಗಳು)',
+    salary: 'ಗರಿಷ್ಠ ಸಂಬಳ',
+    sort: 'ನಂಬಿಕೆಯಿಂದ ಕ್ರಮ ಬದ್ಧಿಸಿ',
+    search: 'ಕೆಲಸ ಹುಡುಕಿ',
+  },
+  mr: {
+    city: 'शहर / भाग',
+    skill: 'कौशल्य',
+    requiredSkill: 'आवश्यक कौशल्य',
+    verification: 'सत्यापन पातळी',
+    experience: 'किमान अनुभव (वर्ष)',
+    salary: 'कमाल वेतन',
+    sort: 'विश्वासानुसार क्रम',
+    search: 'काम शोधा',
+  },
+  bn: {
+    city: 'শহর / এলাকা',
+    skill: 'দক্ষতা',
+    requiredSkill: 'প্রয়োজনীয় দক্ষতা',
+    verification: 'যাচাইকরণ স্তর',
+    experience: 'ন্যূনতম অভিজ্ঞতা (বছর)',
+    salary: 'সর্বোচ্চ বেতন',
+    sort: 'বিশ্বাসের ক্রমে',
+    search: 'কর্ম সন্ধান',
+  },
+};
+
 function languageLabels(language) {
   return LABELS[language] || LABELS.en;
+}
+
+function languageFieldLabels(language) {
+  return FIELD_LABELS[language] || FIELD_LABELS.en;
 }
 
 function option(value, label) {
@@ -225,8 +304,11 @@ function option(value, label) {
 
 export function getFilterOptions(language = 'en') {
   const labels = languageLabels(language);
+  const fieldLabels = languageFieldLabels(language);
 
   return {
+    labels,
+    fieldLabels,
     cities: [option('', labels.allCities), ...CITY_CODES.map((code) => option(code, labels.city[code] || LABELS.en.city[code]))],
     skills: [option('', labels.allSkills), ...SKILL_CODES.map((code) => option(code, labels.skill[code] || LABELS.en.skill[code]))],
     verification: VERIFICATION_VALUES.map((value) => option(value, value ? labels.verification[value] : labels.any)),

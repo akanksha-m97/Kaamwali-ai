@@ -93,12 +93,12 @@ const EmployerSearch = ({ onSearch }) => {
   return (
     <div style={styles.wrapper}>
       <form style={styles.card} onSubmit={handleSubmit}>
-        <h2 style={styles.title}>Find a trusted worker</h2>
-        <p style={styles.subtitle}>Search by city and skill to see available matches</p>
+        <h2 style={styles.title}>{filterOptions.fieldLabels.search}</h2>
+        <p style={styles.subtitle}>{filterOptions.labels?.searchByCity || 'Search by city and skill to see available matches'}</p>
 
         <div style={styles.fieldsGrid}>
           <label style={styles.field}>
-            <span style={styles.label}>City</span>
+            <span style={styles.label}>{filterOptions.fieldLabels.city}</span>
             <select
               value={city}
               onChange={(e) => setCity(e.target.value)}
@@ -121,7 +121,7 @@ const EmployerSearch = ({ onSearch }) => {
           </label>
 
           <label style={styles.field}>
-            <span style={styles.label}>Required skill</span>
+            <span style={styles.label}>{filterOptions.fieldLabels.requiredSkill}</span>
             <select
               value={skill}
               onChange={(e) => setSkill(e.target.value)}
@@ -156,7 +156,7 @@ const EmployerSearch = ({ onSearch }) => {
             e.currentTarget.style.boxShadow = '0 6px 16px rgba(46, 125, 94, 0.28)';
           }}
         >
-          Show matching workers
+          {filterOptions.labels?.showMatching || 'Show matching workers'}
         </button>
       </form>
     </div>

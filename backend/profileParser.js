@@ -1,3 +1,27 @@
+export const ONBOARDING_FIELD_ORDER = [
+  'cityArea',
+  'age',
+  'experienceYears',
+  'skills',
+  'expectedSalary',
+  'availability',
+  'workType',
+  'daysOff',
+  'medicalConditions',
+  'emergencyContact',
+];
+
+export function getInitialOnboardingQueue() {
+  return [...ONBOARDING_FIELD_ORDER];
+}
+
+export function advanceOnboardingQueue(queue, answeredField) {
+  const list = queue?.length ? queue : getInitialOnboardingQueue();
+  const idx = list.indexOf(answeredField);
+  if (idx === -1) return list.slice(1);
+  return list.slice(idx + 1);
+}
+
 const CITY_KEYWORDS = [
   'bhiwani',
   'delhi',
@@ -133,11 +157,11 @@ export function extractInitialDraft(rawText) {
 
   return {
     draft,
-    missingFields: computeMissingFields(draft)
+    missingFields: getInitialOnboardingQueue()
   };
 }
 
-export function updateDraftWithField(draft, field, answerText) {
+export function updateDraftWithField(draft, field, answerText, fieldQueue = null) {
   const newDraft = {
     ...draft,
     rawSegments: [...(draft.rawSegments || []), answerText]
@@ -247,30 +271,31 @@ export function updateDraftWithField(draft, field, answerText) {
 
   return {
     draft: newDraft,
-    missingFields: computeMissingFields(newDraft)
+    missingFields: fieldQueue
+      ? advanceOnboardingQueue(fieldQueue, field)
+      : computeMissingFields(newDraft)
   };
 }
 
 export function computeMissingFields(draft) {
   const missing = [];
 
-  if (draft.name == null || draft.name === '') missing.push('name');
-  if (draft.cityArea == null || draft.cityArea === '') missing.push('cityArea');
+  if (!draft.cityArea) missing.push('cityArea');
   if (draft.age == null) missing.push('age');
   if (draft.experienceYears == null) missing.push('experienceYears');
   if (!draft.skills || draft.skills.length === 0) missing.push('skills');
   if (!draft.expectedSalary) missing.push('expectedSalary');
-
-  if (!draft.emergencyContact) missing.push('emergencyContact');
-  if (draft.comfortableWithFamilies == null) missing.push('comfortableWithFamilies');
-  if (draft.comfortableWithPets == null) missing.push('comfortableWithPets');
-
-  // NEW REQUIRED FIELDS
+  const hasAvailability =
+    draft.availability &&
+    (draft.availability.morning ||
+      draft.availability.afternoon ||
+      draft.availability.evening ||
+      draft.availability.days);
+  if (!hasAvailability) missing.push('availability');
   if (!draft.workType) missing.push('workType');
   if (!draft.daysOff) missing.push('daysOff');
   if (!draft.medicalConditions) missing.push('medicalConditions');
-  if (!draft.willingLateOrTravel) missing.push('willingLateOrTravel');
-  if (!draft.previousEmployerRef) missing.push('previousEmployerRef');
+  if (!draft.emergencyContact) missing.push('emergencyContact');
 
   return missing;
 }

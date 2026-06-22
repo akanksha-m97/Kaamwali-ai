@@ -31,6 +31,18 @@ const base = {
       workerConsent: 'I agree to share my profile with verified homes.',
       employerConsent: 'I agree to contact workers respectfully and fairly.',
       createAccountButton: 'Create account',
+      sendOtpButton: 'Send OTP',
+      verifyOtpButton: 'Verify OTP',
+      setPasswordButton: 'Set Password',
+      otpSent: 'OTP sent to your phone',
+      otpSendFailed: 'Failed to send OTP',
+      phoneVerified: 'Phone verified!',
+      invalidOtp: 'Invalid OTP',
+      resendOtpButton: 'Resend OTP',
+      resendOtpFailed: 'Failed to resend OTP',
+      otpLabel: 'Enter OTP',
+      otpPlaceholder: '6-digit OTP',
+      yourOtpLabel: 'Your OTP',
     },
     voiceOnboarding: {
       initialTitle: 'Tell us about yourself using only your voice',
@@ -46,33 +58,19 @@ const base = {
         'We are putting together your answers into a clear profile that employers can understand quickly.',
     },
     questions: {
-      name: 'What is your full name? Please say your name clearly.',
       cityArea: 'Which city and area do you live in?',
-      age: 'How old are you? Say your age in years, like 25.',
-      experienceYears:
-        'For how many years have you been doing this work? Say it in numbers, like 3 years.',
+      age: 'What is your age?',
+      experienceYears: 'How many years of experience do you have?',
       skills:
-        'Which tasks can you do well? Cleaning, cooking, childcare, elder care, or something else?',
-      expectedSalary:
-        'What monthly salary do you expect? Say a number, for example 8000 or 10000 rupees.',
-      availability:
-        'At what time can you work? Morning, afternoon, or evening? And which days of the week?',
-      workType:
-        'What kind of work arrangement do you prefer? Full-time, part-time, live-in, or live-out?',
-      daysOff:
-        'How many days off do you need in a week, and which day do you prefer as your weekly off?',
+        'What kind of work can you do? For example cooking, cleaning, babysitting.',
+      expectedSalary: 'What monthly salary do you expect?',
+      availability: 'When can you work — morning, afternoon, or evening?',
+      workType: 'Do you want full-time or part-time work?',
+      daysOff: 'How many days off do you want each week?',
       medicalConditions:
-        'Do you have any medical conditions or allergies, like dust allergy, issues with pets, or difficulty lifting heavy items?',
-      willingLateOrTravel:
-        'If needed, are you willing to occasionally stay late or travel with the family?',
-      previousEmployerRef:
-        'Can you share the name and phone number of a previous employer we can talk to?',
+        "Do you have any health conditions we should know about? You can say 'none'.",
       emergencyContact:
         'Who can we call in an emergency? Please say their name and phone number.',
-      comfortableWithFamilies:
-        'Are you comfortable working with joint or large families? Yes or no.',
-      comfortableWithPets:
-        'Are you comfortable working in homes with pets like dogs or cats? Yes or no.',
     },
     examples: {
       initialExampleMain:
@@ -294,6 +292,42 @@ const base = {
   employerTimingFilterPill: 'Timing',
   employerBudgetFilterPill: 'Budget',
 },
+    profile: {
+      loading: 'Loading profile...',
+      noProfileData: 'No profile data found. Please complete onboarding first.',
+      startOnboarding: 'Start Onboarding',
+      dashboard: 'Dashboard',
+      accountInfo: 'Account Info',
+      phone: 'Phone',
+      verified: 'Verified',
+      email: 'Email',
+      location: 'Location',
+      workDetails: 'Work Details',
+      fromResume: 'from resume',
+      experience: 'Experience',
+      years: 'years',
+      expectedSalary: 'Expected Salary',
+      workType: 'Work Type',
+      daysOff: 'Days Off',
+      noWorkDetails: 'No work details specified',
+      skills: 'Skills',
+      languages: 'Languages',
+      noResume: 'No resume yet',
+      completeVoiceOnboarding: 'Complete voice onboarding to generate your resume',
+      generateResume: 'Generate new resume',
+      photoUpdated: 'Photo updated successfully!',
+      errorPrefix: 'Error: ',
+      uploadFailed: 'Upload failed',
+      emailUpdated: 'Email updated successfully!',
+      emailUpdateFailed: 'Failed to update email',
+      changePhoto: 'Change photo',
+      editEmail: 'Edit email',
+      notSpecified: 'Not specified',
+      trustScore: 'Trust Score',
+      idVerified: 'ID Verified',
+      policeVerified: 'Police-verified',
+      domesticWorker: 'Domestic Worker',
+    },
   },
 
   hi: {
@@ -328,6 +362,18 @@ const base = {
       employerConsent:
         'मैं कर्मचारियों से सम्मानपूर्वक संपर्क करने के लिए सहमत हूं।',
       createAccountButton: 'खाता बनाएं',
+      sendOtpButton: 'OTP भेजें',
+      verifyOtpButton: 'OTP सत्यापित करें',
+      setPasswordButton: 'पासवर्ड सेट करें',
+      otpSent: 'आपके फोन पर OTP भेजा गया',
+      otpSendFailed: 'OTP भेजने में विफल',
+      phoneVerified: 'फोन सत्यापित!',
+      invalidOtp: 'अमान्य OTP',
+      resendOtpButton: 'OTP फिर से भेजें',
+      resendOtpFailed: 'OTP फिर से भेजने में विफल',
+      otpLabel: 'OTP दर्ज करें',
+      otpPlaceholder: '6-अंकीय OTP',
+      yourOtpLabel: 'आपका OTP',
     },
     voiceOnboarding: {
       initialTitle: 'अपनी जानकारी सिर्फ आवाज़ से बताइए',
@@ -343,35 +389,20 @@ const base = {
         'हम आपके सभी जवाबों को एक साफ़ और सिंपल प्रोफ़ाइल में डाल रहे हैं जिसे एम्प्लॉयर जल्दी समझ सकें।',
     },
     questions: {
-      name: 'आपका पूरा नाम क्या है? कृपया अपना नाम साफ़‑साफ़ बताएं।',
       cityArea: 'आप किस जगह में रहती हैं? शहर और एरिया का नाम बताएं।',
-      age: 'आपकी उम्र कितनी है? नंबर में बताएं, जैसे 25 साल।',
-      experienceYears:
-        'आप कितने साल से घर का काम कर रही हैं? नंबर में बताएं, जैसे 3 साल।',
+      age: 'आपकी उम्र कितनी है?',
+      experienceYears: 'आपके पास कितने साल का अनुभव है?',
       skills:
-        'आपको कौन‑कौन से काम अच्छे से आते हैं? सफाई, खाना बनाना, बच्चों का ध्यान, बुज़ुर्गों की देखभाल या कुछ और?',
-      expectedSalary:
-        'आप महीने का कितना पैसा चाहती हैं? नंबर में बताएं, जैसे 8000 या 10000 रुपये।',
-      availability:
-        'आप किस समय काम कर सकती हैं? सुबह, दोपहर या शाम? हफ़्ते के कौन‑कौन से दिन काम कर सकती हैं?',
-      workType:
-        'आपको कैसा काम पसंद है? फुल‑टाइम, पार्ट‑टाइम, लाइव‑इन या लाइव‑आउट?',
-      daysOff:
-        'आपको हफ़्ते में कितने दिन छुट्टी चाहिए? कौन‑सा दिन आप वीकली ऑफ़ लेना पसंद करेंगी?',
+        'आप क्या काम कर सकती हैं? उदाहरण के लिए खाना बनाना, सफाई, बच्चों की देखभाल।',
+      expectedSalary: 'आपकी मासिक सैलरी की कितनी उम्मीद है?',
+      availability: 'आप कब काम कर सकती हैं — सुबह, दोपहर, या शाम?',
+      workType: 'क्या आप फुल‑टाइम या पार्ट‑टाइम काम चाहती हैं?',
+      daysOff: 'आप हफ्ते में कितने दिन छुट्टी चाहेंगी?',
       medicalConditions:
-        'क्या आपको कोई मेडिकल प्रॉब्लम या एलर्जी है? जैसे धूल से, पालतू जानवरों से, या भारी सामान उठाने में दिक्कत?',
-      willingLateOrTravel:
-        'ज़रूरत पड़ने पर क्या आप कभी‑कभी देर तक रुकने या परिवार के साथ ट्रैवल करने के लिए तैयार हैं?',
-      previousEmployerRef:
-        'आपने पहले जहाँ काम किया, उनमें से किसी एक का नाम और फ़ोन नंबर बता सकती हैं?',
+        "क्या आपको कोई स्वास्थ्य स्थिति है जो हमें जाननी चाहिए? आप 'कोई नहीं' भी कह सकती हैं।",
       emergencyContact:
         'इमरजेंसी के लिए किसका फ़ोन नंबर दिया जा सकता है? नाम और नंबर बताएं।',
-      comfortableWithFamilies:
-        'क्या आप जॉइंट फ़ैमिली या बड़े परिवार के साथ काम करने में कंफ़र्टेबल हैं? हाँ या नहीं।',
-      comfortableWithPets:
-        'क्या आप कुत्ते या बिल्ली जैसे पालतू जानवर वाले घर में काम करने में कंफ़र्टेबल हैं? हाँ या नहीं।',
-    },
-    examples: {
+    },    examples: {
       initialExampleMain:
         '“मेरा नाम सुनीता है। मैं 5 साल से भिवानी में सफ़ाई और खाना बनाने का काम कर रही हूँ। मैं सुबह 7 से 11 बजे तक काम कर सकती हूँ।”',
     },
@@ -591,6 +622,42 @@ const base = {
   employerTimingFilterPill: 'समय',
   employerBudgetFilterPill: 'बजट',
 },
+    profile: {
+      loading: 'प्रोफाइल लोड हो रहा है...',
+      noProfileData: 'कोई प्रोफाइल डेटा नहीं मिला। कृपया पहले ऑनबोर्डिंग पूरा करें।',
+      startOnboarding: 'ऑनबोर्डिंग शुरू करें',
+      dashboard: 'डैशबोर्ड',
+      accountInfo: 'खाता जानकारी',
+      phone: 'फोन',
+      verified: 'सत्यापित',
+      email: 'ईमेल',
+      location: 'स्थान',
+      workDetails: 'कार्य विवरण',
+      fromResume: 'रेज्यूमे से',
+      experience: 'अनुभव',
+      years: 'साल',
+      expectedSalary: 'अपेक्षित वेतन',
+      workType: 'कार्य प्रकार',
+      daysOff: 'छुट्टी के दिन',
+      noWorkDetails: 'कोई कार्य विवरण निर्दिष्ट नहीं',
+      skills: 'कौशल',
+      languages: 'भाषाएं',
+      noResume: 'अभी तक कोई रेज्यूमे नहीं',
+      completeVoiceOnboarding: 'रेज्यूमे जनरेट करने के लिए वॉइस ऑनबोर्डिंग पूरा करें',
+      generateResume: 'नया रेज्यूमे जनरेट करें',
+      photoUpdated: 'फोटो सफलतापूर्वक अपडेट किया गया!',
+      errorPrefix: 'त्रुटि: ',
+      uploadFailed: 'अपलोड विफल',
+      emailUpdated: 'ईमेल सफलतापूर्वक अपडेट किया गया!',
+      emailUpdateFailed: 'ईमेल अपडेट करने में विफल',
+      changePhoto: 'फोटो बदलें',
+      editEmail: 'ईमेल संपादित करें',
+      notSpecified: 'निर्दिष्ट नहीं',
+      trustScore: 'ट्रस्ट स्कोर',
+      idVerified: 'आईडी सत्यापित',
+      policeVerified: 'पुलिस-सत्यापित',
+      domesticWorker: 'घरेलू कामगार',
+    },
   },
 
   // TELUGU
@@ -626,6 +693,18 @@ const base = {
       employerConsent:
         'వర్కర్లను గౌరవంగా, న్యాయంగా సంప్రదించేందుకు నేను అంగీకరిస్తున్నాను.',
       createAccountButton: 'ఖాతా సృష్టించండి',
+      sendOtpButton: 'OTP పంపండి',
+      verifyOtpButton: 'OTP ధృవీకరించండి',
+      setPasswordButton: 'పాస్‌వర్డ్ సెట్ చేయండి',
+      otpSent: 'మీ ఫోన్‌కు OTP పంపిణీ చేయబడింది',
+      otpSendFailed: 'OTP పంపడం విఫలమైంది',
+      phoneVerified: 'ఫోన్ ధృవీకరించబడింది!',
+      invalidOtp: 'చెల్లని OTP',
+      resendOtpButton: 'OTP మళ్లీ పంపండి',
+      resendOtpFailed: 'OTP మళ్లీ పంపడం విఫలమైంది',
+      otpLabel: 'OTP నమోదు చేయండి',
+      otpPlaceholder: '6-అంకెల OTP',
+      yourOtpLabel: 'మీ OTP',
     },
     voiceOnboarding: {
       initialTitle: 'మీ గురించి మీ స్వరంతో మాత్రమే చెప్పండి',
@@ -641,33 +720,19 @@ const base = {
         'మీ జవాబులను స్పష్టమైన ప్రొఫైల్‌లో మార్చి, ఎంప్లాయర్లు సులభంగా అర్థం చేసుకునేలా చేస్తున్నాం.',
     },
     questions: {
-      name: 'మీ పూర్తి పేరు ఏమిటి? దయచేసి స్పష్టంగా చెప్పండి.',
       cityArea: 'మీరు ఏ నగరంలో, ఏ ఏరియాలో ఉంటున్నారు?',
-      age: 'మీ వయసెంత? ఉదాహరణకు 25 లాంటి సంఖ్యలో చెప్పండి.',
-      experienceYears:
-        'ఈ పని మీరు ఎన్ని సంవత్సరాలుగా చేస్తున్నారు? ఉదాహరణకు 3 సంవత్సరాలు.',
+      age: 'మీ వయసెంత?',
+      experienceYears: 'మీకు ఎంత సంవత్సరాల అనుభవం ఉంది?',
       skills:
-        'మీకు ఏ పనులు బాగా వస్తాయి? శుభ్రపరచడం, వంట, పిల్లల సంరక్షణ, వృద్ధుల సంరక్షణ లేదా ఇంకేదైనా?',
-      expectedSalary:
-        'మీకు నెలకు ఎంత జీతం కావాలి? ఉదాహరణకు 8000 లేదా 10000 రూపాయలు.',
-      availability:
-        'మీరు ఏ సమయానికి పని చేయగలరు? ఉదయం, మధ్యాహ్నం లేదా సాయంత్రం? వారం లో ఏ రోజులు పని చేయగలరు?',
-      workType:
-        'మీకు ఏ రకం పని ఎక్కువగా నచ్చుతుంది? ఫుల్‑టైమ్, పార్ట్‑టైమ్, లైవ్‑ఇన్ లేదా లైవ్‑ఔట్?',
-      daysOff:
-        'మీకు వారం లో ఎన్ని రోజుల సెలవు కావాలి? ఏ రోజు వీక్లీ ఆఫ్‌గా కావాలి?',
+        'మీరు ఏ రకాల పని చేయగలరు? ఉదాహరణకు వంట, శుభ్రత, పిల్లల సంరక్షణ.',
+      expectedSalary: 'మీరు నెలకు ఎంత జీతం ఆశిస్తున్నారు?',
+      availability: 'మీరు ఎప్పుడు పని చేయగలరు — ఉదయం, మధ్యాహ్నం, లేదా సాయంత్రం?',
+      workType: 'మీకు ఫుల్‑టైమ్ లేదా పార్ట్‑టైమ్ పని కావాలా?',
+      daysOff: 'మీకు వారంలో ఎంత సెలవు కావాలి?',
       medicalConditions:
-        'మీకు ఏమైనా ఆరోగ్య సమస్యలు లేదా అలర్జీలు ఉన్నాయా? ధూళి, పెట్స్ లేదా బరువైన సామాను ఎత్తడంలో ఇబ్బంది వంటివి?',
-      willingLateOrTravel:
-        'అవసరం అయితే కొన్నిసార్లు ఆలస్యంగా ఉండటానికి లేదా కుటుంబంతో ప్రయాణానికి మీరు సిద్ధంగా ఉన్నారా?',
-      previousEmployerRef:
-        'మీరుముందు పని చేసిన యజమానుల్లో ఎవరి పేరు, ఫోన్ నంబర్ ఇవ్వగలరు?',
+        "మీకు ఏవైనా వైద్య పరిస్థితులు ఉన్నాయా? మీరు 'లేదు' కూడా చెప్పవచ్చు.",
       emergencyContact:
-        'తక్షణ పరిస్థితిలో ఎవరికి ఫోన్ చేయాలి? వారి పేరు మరియు ఫోన్ నంబర్ చెప్పండి.',
-      comfortableWithFamilies:
-        'జాయింట్ ఫ్యామిలీ లేదా పెద్ద కుటుంబంలో పని చేయడంలో మీకు సౌకర్యంగా ఉంటుందా? అవును లేదా కాదు.',
-      comfortableWithPets:
-        'కుక్కలు, పిల్లులు వంటి పెట్స్ ఉన్న ఇళ్లలో పని చేయడంలో మీకు సౌకర్యంగా ఉంటుందా? అవును లేదా కాదు.',
+        'తక్షణ పరిస్థితిలో ఎవరిని సంప్రదించాలి? వారి పేరు మరియు ఫోన్ నంబర్ చెప్పండి.',
     },
     examples: {
       initialExampleMain:
@@ -886,6 +951,42 @@ const base = {
   employerTimingFilterPill: 'సమయం',
   employerBudgetFilterPill: 'బడ్జెట్',
 },
+    profile: {
+      loading: 'ప్రొఫైల్ లోడ్ అవుతోంది...',
+      noProfileData: 'ప్రొఫైల్ డేటా కనుగొనబడలేదు. దయచేసి ముందుగా ఆన్‌బోర్డింగ్ పూర్తి చేయండి.',
+      startOnboarding: 'ఆన్‌బోర్డింగ్ ప్రారంభించండి',
+      dashboard: 'డాష్‌బోర్డ్',
+      accountInfo: 'ఖాతా సమాచారం',
+      phone: 'ఫోన్',
+      verified: 'ధృవీకరించబడింది',
+      email: 'ఇమెయిల్',
+      location: 'స్థానం',
+      workDetails: 'పని వివరాలు',
+      fromResume: 'రెజ్యూమ్ నుండి',
+      experience: 'అనుభవం',
+      years: 'సంవత్సరాలు',
+      expectedSalary: 'ఆశించిన వేతనం',
+      workType: 'పని రకం',
+      daysOff: 'సెలవు రోజులు',
+      noWorkDetails: 'పని వివరాలు పేర్కొనబడలేదు',
+      skills: 'నైపుణ్యాలు',
+      languages: 'భాషలు',
+      noResume: 'ఇంకా రెజ్యూమ్ లేదు',
+      completeVoiceOnboarding: 'రెజ్యూమ్ జనరేట్ చేయడానికి వాయిస్ ఆన్‌బోర్డింగ్ పూర్తి చేయండి',
+      generateResume: 'కొత్త రెజ్యూమ్ జనరేట్ చేయండి',
+      photoUpdated: 'ఫోటో విజయవంతంగా అప్‌డేట్ చేయబడింది!',
+      errorPrefix: 'లోపం: ',
+      uploadFailed: 'అప్‌లోడ్ విఫలమైంది',
+      emailUpdated: 'ఇమెయిల్ విజయవంతంగా అప్‌డేట్ చేయబడింది!',
+      emailUpdateFailed: 'ఇమెయిల్ అప్‌డేట్ చేయడంలో విఫలమైంది',
+      changePhoto: 'ఫోటో మార్చండి',
+      editEmail: 'ఇమెయిల్ ఎడిట్ చేయండి',
+      notSpecified: 'పేర్కొనబడలేదు',
+      trustScore: 'ట్రస్ట్ స్కోర్',
+      idVerified: 'ID ధృవీకరించబడింది',
+      policeVerified: 'పోలీస్-ధృవీకరించబడింది',
+      domesticWorker: 'గృహ కార్మికుడు',
+    },
   },
 
   // KANNADA
@@ -921,6 +1022,18 @@ const base = {
       employerConsent:
         'ವರ್ಕರ್‌ಗಳನ್ನು ಗೌರವದಿಂದ ಮತ್ತು ನ್ಯಾಯವಾಗಿ ಸಂಪರ್ಕಿಸಲು ನಾನು ಒಪ್ಪುತ್ತೇನೆ.',
       createAccountButton: 'ಖಾತೆ ರಚಿಸಿ',
+      sendOtpButton: 'OTP ಕಳುಹಿಸಿ',
+      verifyOtpButton: 'OTP ದೃಢೀಕರಿಸಿ',
+      setPasswordButton: 'ಪಾಸ್‌ವರ್ಡ್ ಹೊಂದಿಸಿ',
+      otpSent: 'ನಿಮ್ಮ ಫೋನ್‌ಗೆ OTP ಕಳುಹಿಸಲಾಗಿದೆ',
+      otpSendFailed: 'OTP ಕಳುಹಿಸಲು ವಿಫಲವಾಗಿದೆ',
+      phoneVerified: 'ಫೋನ್ ದೃಢೀಕೃತ!',
+      invalidOtp: 'ಅನೈತಿಕ OTP',
+      resendOtpButton: 'OTP ಮತ್ತೆ ಕಳುಹಿಸಿ',
+      resendOtpFailed: 'OTP ಮತ್ತೆ ಕಳುಹಿಸಲು ವಿಫಲವಾಗಿದೆ',
+      otpLabel: 'OTP ನಮೂದಿಸಿ',
+      otpPlaceholder: '6-ಅಂಕೆ OTP',
+      yourOtpLabel: 'ನಿಮ್ಮ OTP',
     },
     voiceOnboarding: {
       initialTitle: 'ನಿಮ್ಮ ಬಗ್ಗೆ ನಿಮ್ಮ ಧ್ವನಿಯಿಂದ ಮಾತ್ರ ಹೇಳಿ',
@@ -936,33 +1049,19 @@ const base = {
         'ನಿಮ್ಮ ಉತ್ತರಗಳನ್ನು ಸ್ಪಷ್ಟವಾದ ಪ್ರೊಫೈಲ್ ಆಗಿ ರೂಪಿಸುತ್ತಿದ್ದೇವೆ, ώστε ಉದ್ಯೋಗದಾತರು ಬೇಗ ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು.',
     },
     questions: {
-      name: 'ನಿಮ್ಮ ಪೂರ್ಣ ಹೆಸರು ಏನು? ದಯವಿಟ್ಟು ಸ್ಪಷ್ಟವಾಗಿ ಹೇಳಿ.',
       cityArea: 'ನೀವು ಯಾವ ನಗರ ಮತ್ತು ಪ್ರದೇಶದಲ್ಲಿ ವಾಸಿಸುತ್ತೀರಿ?',
-      age: 'ನಿಮ್ಮ ವಯಸ್ಸು ಎಷ್ಟು? ಉದಾಹರಣೆಗೆ 25 ಸಂಖ್ಯೆಯಲ್ಲಿ ಹೇಳಿ.',
-      experienceYears:
-        'ಈ ಕೆಲಸವನ್ನು ನೀವು ಎಷ್ಟು ವರ್ಷಗಳಿಂದ ಮಾಡುತ್ತಿದ್ದೀರಿ? ಉದಾಹರಣೆಗೆ 3 ವರ್ಷ.',
+      age: 'ನಿಮ್ಮ ವಯಸ್ಸು ಎಷ್ಟು?',
+      experienceYears: 'ನಿಮಗೆ ಎಷ್ಟು ವರ್ಷಗಳ ಅನುಭವವಿದೆ?',
       skills:
-        'ನಿಮಗೆ ಯಾವ ಕೆಲಸಗಳು ಚೆನ್ನಾಗಿ ಬರುತ್ತವೆ? ಸ್ವಚ್ಛತೆ, ಅಡುಗೆ, ಮಕ್ಕಳ ಕಾಳಜಿ, ವೃದ್ಧರ ಕಾಳಜಿ ಅಥವಾ ಇನ್ನಾವುದೇ?',
-      expectedSalary:
-        'ನೀವು ತಿಂಗಳಿಗೆ ಎಷ್ಟು ಸಂಬಳ ನಿರೀಕ್ಷಿಸುತ್ತೀರಿ? ಉದಾಹರಣೆಗೆ 8000 ಅಥವಾ 10000 ರೂಪಾಯಿ.',
-      availability:
-        'ನೀವು ಯಾವ ಸಮಯದಲ್ಲಿ ಕೆಲಸ ಮಾಡಬಹುದು? ಬೆಳಿಗ್ಗೆ, ಮಧ್ಯಾಹ್ನ ಅಥವಾ ಸಂಜೆ? ವಾರದಲ್ಲಿ ಯಾವ ದಿನಗಳು ಕೆಲಸ ಮಾಡಬಹುದು?',
-      workType:
-        'ನಿಮಗೆ ಯಾವ ರೀತಿಯ ಕೆಲಸ ಸೂಕ್ತ? ಫುಲ್‑ಟೈಮ್, ಪಾರ್ಟ್‑ಟೈಮ್, ಲೈವ್‑ಇನ್ ಅಥವಾ ಲೈವ್‑ಔಟ್?',
-      daysOff:
-        'ನಿಮಗೆ ವಾರದಲ್ಲಿ ಎಷ್ಟು ದಿನ ರಜೆ ಬೇಕು? ಯಾವ ದಿನವನ್ನು ವೀಕ್ಲಿ ಆಫ್ ಆಗಿ ಇಚ್ಛಿಸುತ್ತೀರಿ?',
+        'ನೀವು ಯಾವ ರೀತಿಯ ಕೆಲಸ ಮಾಡಬಹುದು? ಉದಾಹರಣೆಗೆ ಅಡುಗೆ, ಸ್ವಚ್ಛತೆ, ಮಕ್ಕಳ ಕಾಳಜಿ.',
+      expectedSalary: 'ನೀವು ತಿಂಗಳಿಗೆ ಎಷ್ಟು ಸಂಬಳ ನಿರೀಕ್ಷಿಸುತ್ತಿರಿ?',
+      availability: 'ನೀವು ಯಾವಾಗ ಕೆಲಸ ಮಾಡಬಹುದು — ಬೆಳಿಗ್ಗೆ, ಮಧ್ಯಾಹ್ನ ಅಥವಾ ಸಂಜೆ?',
+      workType: 'ನಿಮಗೆ ಫುಲ್‑ಟೈಮ್ ಅಥವಾ ಪಾರ್ಟ್‑ಟೈಮ್ ಕೆಲಸ ಬೇಕೆ?',
+      daysOff: 'ನೀವು ವಾರದಲ್ಲಿ ಎಷ್ಟು ರಜೆ ಬೇಕೆಂದು ಇಚ್ಛಿಸುತ್ತೀರಿ?',
       medicalConditions:
-        'ನಿಮಗೆ ಯಾವುದಾದರೂ ಆರೋಗ್ಯ ಸಮಸ್ಯೆ ಅಥವಾ ಅಲರ್ಜೀ ಇದೆಯೇ? ಧೂಳು, ಪೆಟ್ಸ್ ಅಥವಾ ಭಾರವಾದ ಸಾಮಾನು ಎತ್ತುವ ಸಮಸ್ಯೆ ಹೀಗೆ?',
-      willingLateOrTravel:
-        'ಅವಶ್ಯಕವಾದರೆ ಕೆಲವೊಮ್ಮೆ ತಡವಾಗಿ ಉಳಿಯಲು ಅಥವಾ ಕುಟುಂಬದೊಂದಿಗೆ ಪ್ರಯಾಣ ಮಾಡಲು ಸಿದ್ಧರಾಗಿದ್ದೀರಾ?',
-      previousEmployerRef:
-        'ಹಿಂದೆ ಕೆಲಸ ಮಾಡಿದ ಮನೆಗಳಲ್ಲಿ ಯಾರಾದರೂ ಒಬ್ಬರ ಹೆಸರು ಮತ್ತು ಫೋನ್ ನಂಬರ್ ಹೇಳಬಹುದು?',
+        "ನಿಮಗೆ ಯಾವುದೇ ಆರೋಗ್ಯ ಸಮಸ್ಯೆಗಳಿವೆಯೇ? ನೀವು 'ಇಲ್ಲ' ಎಂದು ಹೇಳಬಹುದು.",
       emergencyContact:
-        'ತುರ್ತು ಪರಿಸ್ಥಿತಿಯಲ್ಲಿ ಯಾರಿಗೆ ಕರೆ ಮಾಡಬೇಕು? ಅವರ ಹೆಸರು ಮತ್ತು ಫೋನ್ ನಂಬರ್ ಹೇಳಿ.',
-      comfortableWithFamilies:
-        'ಜಂಟಿ ಕುಟುಂಬ ಅಥವಾ ದೊಡ್ಡ ಕುಟುಂಬದೊಂದಿಗೆ ಕೆಲಸ ಮಾಡಲು ನಿಮಗೆ ಅನುಕೂಲವಾಗುತ್ತದೆಯೇ? ಹೌದು ಅಥವಾ ಇಲ್ಲ.',
-      comfortableWithPets:
-        'ನಾಯಿಗಳು, ಬೆಕ್ಕುಗಳು ಇತ್ಯಾದಿ ಪೆಟ್ಸ್ ಇರುವ ಮನೆಗಳಲ್ಲಿ ಕೆಲಸ ಮಾಡಲು ನಿಮಗೆ ಅನುಕೂಲವಾಗುತ್ತದೆಯೇ? ಹೌದು ಅಥವಾ ಇಲ್ಲ.',
+        'ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ ಯಾರಿಗೆ ಕರೆ ಮಾಡಬೇಕು? ಅವರ ಹೆಸರು ಮತ್ತು ಫೋನ್ ನಂಬರ್ ಹೇಳಿ.',
     },
     examples: {
       initialExampleMain:
@@ -1179,6 +1278,42 @@ const base = {
   employerTimingFilterPill: 'ಸಮಯ',
   employerBudgetFilterPill: 'ಬಜೆಟ್',
 },
+    profile: {
+      loading: 'ಪ್ರೊಫೈಲ್ ಲೋಡ್ ಆಗುತ್ತಿದೆ...',
+      noProfileData: 'ಯಾವುದೇ ಪ್ರೊಫೈಲ್ ಡೇಟಾ ಸಿಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮೊದಲು ಆನ್‌ಬೋರ್ಡಿಂಗ್ ಪೂರ್ಣಗೊಳಿಸಿ.',
+      startOnboarding: 'ಆನ್‌ಬೋರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸಿ',
+      dashboard: 'ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',
+      accountInfo: 'ಖಾತೆ ಮಾಹಿತಿ',
+      phone: 'ಫೋನ್',
+      verified: 'ದೃಢೀಕರಿಸಲಾಗಿದೆ',
+      email: 'ಇಮೇಲ್',
+      location: 'ಸ್ಥಳ',
+      workDetails: 'ಕೆಲಸದ ವಿವರಗಳು',
+      fromResume: 'ರೆಸ್ಯೂಮ್‌ನಿಂದ',
+      experience: 'ಅನುಭವ',
+      years: 'ವರ್ಷಗಳು',
+      expectedSalary: 'ನಿರೀಕ್ಷಿತ ವೇತನ',
+      workType: 'ಕೆಲಸದ ಪ್ರಕಾರ',
+      daysOff: 'ರಜಾ ದಿನಗಳು',
+      noWorkDetails: 'ಯಾವುದೇ ಕೆಲಸದ ವಿವರಗಳು ನಿರ್ದಿಷ್ಟಪಡಿಸಲಾಗಿಲ್ಲ',
+      skills: 'ಕೌಶಲ್ಯಗಳು',
+      languages: 'ಭಾಷೆಗಳು',
+      noResume: 'ಇನ್ನೂ ರೆಸ್ಯೂಮ್ ಇಲ್ಲ',
+      completeVoiceOnboarding: 'ರೆಸ್ಯೂಮ್ ರಚಿಸಲು ಧ್ವನಿ ಆನ್‌ಬೋರ್ಡಿಂಗ್ ಪೂರ್ಣಗೊಳಿಸಿ',
+      generateResume: 'ಹೊಸ ರೆಸ್ಯೂಮ್ ರಚಿಸಿ',
+      photoUpdated: 'ಫೋಟೋ ಯಶಸ್ವಿಯಾಗಿ ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ!',
+      errorPrefix: 'ದೋಷ: ',
+      uploadFailed: 'ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಗಿದೆ',
+      emailUpdated: 'ಇಮೇಲ್ ಯಶಸ್ವಿಯಾಗಿ ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ!',
+      emailUpdateFailed: 'ಇಮೇಲ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ',
+      changePhoto: 'ಫೋಟೋ ಬದಲಾಯಿಸಿ',
+      editEmail: 'ಇಮೇಲ್ ಸಂಪಾದಿಸಿ',
+      notSpecified: 'ನಿರ್ದಿಷ್ಟಪಡಿಸಲಾಗಿಲ್ಲ',
+      trustScore: 'ಟ್ರಸ್ಟ್ ಸ್ಕೋರ್',
+      idVerified: 'ID ದೃಢೀಕರಿಸಲಾಗಿದೆ',
+      policeVerified: 'ಪೊಲೀಸ್-ದೃಢೀಕರಿಸಲಾಗಿದೆ',
+      domesticWorker: 'ಗೃಹ ಕಾರ್ಮಿಕ',
+    },
   },
 
   // MARATHI
@@ -1214,6 +1349,18 @@ const base = {
       employerConsent:
         'मी कामगारांशी आदराने आणि न्यायाने संपर्क करण्यास सहमत आहे.',
       createAccountButton: 'खाते तयार करा',
+      sendOtpButton: 'OTP पाठवा',
+      verifyOtpButton: 'OTP पडताळा',
+      setPasswordButton: 'पासवर्ड सेट करा',
+      otpSent: 'तुमच्या फोनला OTP पाठविला गेला',
+      otpSendFailed: 'OTP पाठवण्यात अयशस्वी',
+      phoneVerified: 'फोन पडताळले!',
+      invalidOtp: 'अमान्य OTP',
+      resendOtpButton: 'OTP पुन्हा पाठवा',
+      resendOtpFailed: 'OTP पुन्हा पाठवण्यात अयशस्वी',
+      otpLabel: 'OTP टाका',
+      otpPlaceholder: '6-अंकी OTP',
+      yourOtpLabel: 'आपला OTP',
     },
     voiceOnboarding: {
       initialTitle: 'तुमच्या बद्दल फक्त आवाजातून सांगा',
@@ -1229,33 +1376,19 @@ const base = {
         'तुमचे सर्व उत्तर एका सोप्या आणि स्पष्ट प्रोफाइलमध्ये मांडत आहोत जे नियोक्त्यांना पटकन समजेल.',
     },
     questions: {
-      name: 'तुमचं पूर्ण नाव काय आहे? कृपया स्पष्टपणे सांगा.',
       cityArea: 'तुम्ही कोणत्या शहरात आणि कोणत्या भागात राहता?',
-      age: 'तुमचे वय किती आहे? उदाहरणार्थ २५ असे नंबरमध्ये सांगा.',
-      experienceYears:
-        'तुम्ही घरकाम किती वर्षांपासून करत आहात? उदाहरणार्थ ३ वर्ष.',
+      age: 'तुमचे वय किती आहे?',
+      experienceYears: 'तुम्हाला किती वर्षांचा अनुभव आहे?',
       skills:
-        'तुम्हाला कोणकोणती कामं चांगली येतात? साफसफाई, स्वयंपाक, मुलांची काळजी, ज्येष्ठांची काळजी किंवा काही वेगळं?',
-      expectedSalary:
-        'तुम्हाला महिन्याला किती पगार हवा आहे? उदाहरणार्थ ८००० किंवा १०००० रुपये.',
-      availability:
-        'तुम्ही कोणत्या वेळेला काम करू शकता? सकाळ, दुपार किंवा संध्याकाळ? आठवड्यात कोणत्या दिवशी काम करू शकता?',
-      workType:
-        'तुम्हाला कोणत्या प्रकारचं काम आवडेल? फुल‑टाइम, पार्ट‑टाइम, लाईव्ह‑इन किंवा लाईव्ह‑आऊट?',
-      daysOff:
-        'तुम्हाला आठवड्यात किती दिवस सुट्टी हवी आहे? कोणता दिवस साप्ताहिक सुट्टीसाठी पसंत कराल?',
+        'तुला कोणते काम येते? उदाहरणार्थ स्वयंपाक, सफाई, मुलांची काळजी.',
+      expectedSalary: 'तुम्ही महिन्याला किती पगार अपेक्षित करता?',
+      availability: 'तू केव्हा काम करू शकतोस — सकाळ, दुपार, की संध्याकाळ?',
+      workType: 'तुला फुल‑टाइम की पार्ट‑टाइम काम हवे?',
+      daysOff: 'तुला आठवड्यात किती दिवस सुट्टी हवी?',
       medicalConditions:
-        'तुम्हाला काही आरोग्याच्या तक्रारी किंवा अॅलर्जी आहेत का? जसे धूळ, पाळीव प्राणी किंवा जड वस्तू उचलण्यात अडचण?',
-      willingLateOrTravel:
-        'गरज पडल्यास कधी कधी उशिरापर्यंत थांबायला किंवा कुटुंबासोबत प्रवासाला जायला तयार आहात का?',
-      previousEmployerRef:
-        'ज्या घरात तुम्ही आधी काम केले, त्यांपैकी एखाद्याचे नाव आणि फोन नंबर सांगू शकता का?',
+        "तुला काही आरोग्य समस्या आहे का? तू 'नाही' असं देखील म्हणू शकतोस.",
       emergencyContact:
-        'इमर्जन्सी साठी कोणाचा फोन नंबर देऊ शकतो? त्यांचं नाव आणि नंबर सांगा.',
-      comfortableWithFamilies:
-        'जॉइंट फॅमिली किंवा मोठ्या कुटुंबासोबत काम करायला तुम्ही कम्फर्टेबल आहात का? होय किंवा नाही.',
-      comfortableWithPets:
-        'कुत्रे, मांजरी सारखे पाळीव प्राणी असलेल्या घरात काम करायला तुम्ही कम्फर्टेबल आहात का? होय किंवा नाही.',
+        'आकस्मिक स्थितीत कोणाला फोन करायचे? त्यांचे नाव आणि फोन नंबर सांगा.',
     },
     examples: {
       initialExampleMain:
@@ -1473,6 +1606,42 @@ const base = {
   employerTimingFilterPill: 'वेळ',
   employerBudgetFilterPill: 'बजेट',
 },
+    profile: {
+      loading: 'प्रोफाइल लोड होत आहे...',
+      noProfileData: 'कोणतेही प्रोफाइल डेटा सापडले नाही. कृपया प्रथम ऑनबोर्डिंग पूर्ण करा.',
+      startOnboarding: 'ऑनबोर्डिंग सुरू करा',
+      dashboard: 'डॅशबोर्ड',
+      accountInfo: 'खाते माहिती',
+      phone: 'फोन',
+      verified: 'सत्यापित',
+      email: 'ईमेल',
+      location: 'स्थान',
+      workDetails: 'कामाची माहिती',
+      fromResume: 'रेझ्युमेवरून',
+      experience: 'अनुभव',
+      years: 'वर्षे',
+      expectedSalary: 'अपेक्षित पगार',
+      workType: 'कामाचा प्रकार',
+      daysOff: 'सुटक्या',
+      noWorkDetails: 'कामाची माहिती निर्दिष्ट केलेली नाही',
+      skills: 'कौशल्ये',
+      languages: 'भाषा',
+      noResume: 'अजून रेझ्युमे नाही',
+      completeVoiceOnboarding: 'रेझ्युमे तयार करण्यासाठी व्हॉइस ऑनबोर्डिंग पूर्ण करा',
+      generateResume: 'नवीन रेझ्युमे तयार करा',
+      photoUpdated: 'फोटो यशस्वीरित्या अपडेट केले गेले!',
+      errorPrefix: 'त्रुटी: ',
+      uploadFailed: 'अपलोड अयशस्वी',
+      emailUpdated: 'ईमेल यशस्वीरित्या अपडेट केले गेले!',
+      emailUpdateFailed: 'ईमेल अपडेट करण्यात अयशस्वी',
+      changePhoto: 'फोटो बदला',
+      editEmail: 'ईमेल संपादित करा',
+      notSpecified: 'निर्दिष्ट केलेले नाही',
+      trustScore: 'विश्वास स्कोर',
+      idVerified: 'ID सत्यापित',
+      policeVerified: 'पोलीस-सत्यापित',
+      domesticWorker: 'घरेलू कामगार',
+    },
   },
 
   // BENGALI
@@ -1508,6 +1677,18 @@ const base = {
       employerConsent:
         'আমি কর্মীদের সাথে সম্মানজনক ও ন্যায্যভাবে যোগাযোগ করতে সম্মত।',
       createAccountButton: 'একাউন্ট তৈরি করুন',
+      sendOtpButton: 'OTP পাঠান',
+      verifyOtpButton: 'OTP যাচাই করুন',
+      setPasswordButton: 'পাসওয়ার্ড সেট করুন',
+      otpSent: 'আপনার ফোনে OTP পাঠানো হয়েছে',
+      otpSendFailed: 'OTP পাঠাতে ব্যর্থ',
+      phoneVerified: 'ফোন যাচাই করা হয়েছে!',
+      invalidOtp: 'অবৈধ OTP',
+      resendOtpButton: 'OTP পুনরায় পাঠান',
+      resendOtpFailed: 'OTP পুনরায় পাঠাতে ব্যর্থ',
+      otpLabel: 'OTP লিখুন',
+      otpPlaceholder: '6-অঙ্কের OTP',
+      yourOtpLabel: 'আপনার OTP',
     },
     voiceOnboarding: {
       initialTitle: 'শুধু আপনার কণ্ঠে নিজের কথা বলুন',
@@ -1523,33 +1704,19 @@ const base = {
         'আপনার সব উত্তরকে একটি পরিষ্কার প্রোফাইলে সাজানো হচ্ছে যাতে নিয়োগদাতা দ্রুত বুঝতে পারেন।',
     },
     questions: {
-      name: 'আপনার পুরো নাম কী? দয়া করে স্পষ্ট করে বলুন।',
       cityArea: 'আপনি কোন শহরে এবং কোন এলাকায় থাকেন?',
-      age: 'আপনার বয়স কত? উদাহরণ হিসেবে ২৫ এর মতো সংখ্যা বলুন।',
-      experienceYears:
-        'এই ধরনের কাজ আপনি কত বছর ধরে করছেন? উদাহরণ হিসেবে ৩ বছর।',
+      age: 'আপনার বয়স কত?',
+      experienceYears: 'আপনার কত বছর অভিজ্ঞতা আছে?',
       skills:
-        'আপনি কোন কোন কাজ ভাল পারেন? ঘর পরিষ্কার, রান্না, বাচ্চাদের দেখাশোনা, বৃদ্ধদের দেখাশোনা নাকি অন্য কিছু?',
-      expectedSalary:
-        'মাসে আপনি কত টাকা বেতন আশা করেন? উদাহরণ হিসেবে ৮০০০ বা ১০০০০ টাকা।',
-      availability:
-        'আপনি কোন সময়ে কাজ করতে পারবেন? সকাল, দুপুর না সন্ধ্যা? সপ্তাহে কোন কোন দিন কাজ করতে পারবেন?',
-      workType:
-        'কোন ধরনের কাজের ব্যবস্থা আপনার পছন্দ? ফুল‑টাইম, পার্ট‑টাইম, লাইভ‑ইন নাকি লাইভ‑আউট?',
-      daysOff:
-        'আপনি সপ্তাহে কতদিন ছুটি চান? কোন দিনটিকে সাপ্তাহিক ছুটি হিসেবে রাখতে চান?',
+        'আপনি কী ধরনের কাজ করতে পারেন? যেমন রান্না, পরিষ্কার, শিশুর যত্ন।',
+      expectedSalary: 'আপনি মাসে কত বেতন আশা করেন?',
+      availability: 'আপনি কখন কাজ করতে পারেন — সকাল, দুপুর, না সন্ধ্যা?',
+      workType: 'আপনি ফুল‑টাইম না পার্ট‑টাইম কাজ চান?',
+      daysOff: 'আপনি সপ্তাহে কতদিন ছুটি চান?',
       medicalConditions:
-        'আপনার কি কোনও স্বাস্থ্য সমস্যা বা অ্যালার্জি আছে? যেমন ধূলায় অ্যালার্জি, পোষা প্রাণী, বা ভারী জিনিস তুলতে সমস্যা?',
-      willingLateOrTravel:
-        'প্রয়োজন হলে কি মাঝে মাঝে দেরি পর্যন্ত থাকতে বা পরিবারের সঙ্গে ভ্রমণে যেতে আপনি রাজি?',
-      previousEmployerRef:
-        'আপনি পূর্বে যেখানে কাজ করেছেন, সেখানে কারও নাম এবং ফোন নম্বর বলতে পারবেন?',
+        "আপনার কি কোনো স্বাস্থ্য সমস্যা আছে? আপনি 'কোনো না'ও বলতে পারেন।",
       emergencyContact:
         'জরুরি অবস্থায় কাকে ফোন করা যাবে? তার নাম এবং ফোন নম্বর বলুন।',
-      comfortableWithFamilies:
-        'জয়েন্ট ফ্যামিলি বা বড় পরিবারের সঙ্গে কাজ করতে আপনি স্বচ্ছন্দ বোধ করেন? হ্যাঁ বা না।',
-      comfortableWithPets:
-        'কুকুর, বিড়ালের মতো পোষা প্রাণী থাকা বাড়িতে কাজ করতে আপনি স্বচ্ছন্দ বোধ করেন? হ্যাঁ বা না।',
     },
     examples: {
       initialExampleMain:
@@ -1604,6 +1771,42 @@ const base = {
   step3Title: 'বাড়িগুলো আপনাকে খুঁজে পায়',
   step3Text: 'আশেপাশের বাড়িগুলো আপনার দক্ষতা দেখে যোগাযোগ করে।',
 },
+    profile: {
+      loading: 'প্রোফাইল লোড হচ্ছে...',
+      noProfileData: 'কোনো প্রোফাইল ডেটা পাওয়া যায়নি। দয়া করে প্রথমে অনবোর্ডিং সম্পন্ন করুন।',
+      startOnboarding: 'অনবোর্ডিং শুরু করুন',
+      dashboard: 'ড্যাশবোর্ড',
+      accountInfo: 'অ্যাকাউন্ট তথ্য',
+      phone: 'ফোন',
+      verified: 'যাচাই করা হয়েছে',
+      email: 'ইমেল',
+      location: 'অবস্থান',
+      workDetails: 'কাজের বিবরণ',
+      fromResume: 'রেজুমে থেকে',
+      experience: 'অভিজ্ঞতা',
+      years: 'বছর',
+      expectedSalary: 'প্রত্যাশিত বেতন',
+      workType: 'কাজের ধরন',
+      daysOff: 'ছুটির দিন',
+      noWorkDetails: 'কোনো কাজের বিবরণ নির্দিষ্ট করা হয়নি',
+      skills: 'দক্ষতা',
+      languages: 'ভাষা',
+      noResume: 'এখনও কোনো রেজুমে নেই',
+      completeVoiceOnboarding: 'রেজুমে তৈরি করতে ভয়েস অনবোর্ডিং সম্পন্ন করুন',
+      generateResume: 'নতুন রেজুমে তৈরি করুন',
+      photoUpdated: 'ফটো সফলভাবে আপডেট করা হয়েছে!',
+      errorPrefix: 'ত্রুটি: ',
+      uploadFailed: 'আপলোড ব্যর্থ',
+      emailUpdated: 'ইমেল সফলভাবে আপডেট করা হয়েছে!',
+      emailUpdateFailed: 'ইমেল আপডেট করতে ব্যর্থ',
+      changePhoto: 'ফটো পরিবর্তন করুন',
+      editEmail: 'ইমেল সম্পাদনা করুন',
+      notSpecified: 'নির্দিষ্ট করা হয়নি',
+      trustScore: 'ট্রাস্ট স্কোর',
+      idVerified: 'আইডি যাচাই করা হয়েছে',
+      policeVerified: 'পুলিশ-যাচাই করা হয়েছে',
+      domesticWorker: 'গৃহকর্মী',
+    },
   },
 };
 
