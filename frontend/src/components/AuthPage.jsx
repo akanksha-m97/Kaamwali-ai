@@ -82,10 +82,13 @@ const AuthPage = ({ onAuthSuccess }) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        phone: formData.phone,
-        password: formData.password,
-        role: userType,
-      }),
+  name: formData.name,
+  phone: formData.phone,
+  email: formData.email,
+  city: formData.city,
+  password: formData.password,
+  role: userType,
+})
     });
     const data = await res.json();
     if (!res.ok) {

@@ -1442,7 +1442,17 @@ app.get('/api/workers', async (req, res) => {
               { $multiply: ['$trustScore', 0.7] },
               { $cond: { if: { $eq: ['$verificationLevel', 'police'] }, then: 20, else: 0 } },
               { $cond: { if: { $eq: ['$verificationLevel', 'id'] }, then: 10, else: 0 } },
-              { $multiply: [{ $divide: ['$experienceYears', 10] }, 5] },
+              {
+  $multiply: [
+    {
+      $divide: [
+        { $toDouble: '$experienceYears' },
+        10
+      ]
+    },
+    5
+  ]
+}
             ],
           },
           // NEW: candidateScore (learned ranking based on hire likelihood)
@@ -1582,7 +1592,7 @@ app.post('/api/verify-otp', async (req, res) => {
 
 app.post('/api/set-password', async (req, res) => {
   try {
-    const { phone, password, role } = req.body || {};
+    const { name, phone, email, city, password, role } = req.body || {};
 
     if (!phone || !password) {
       return res.status(400).json({ error: 'Phone and password required' });
@@ -1596,11 +1606,12 @@ app.post('/api/set-password', async (req, res) => {
           password: hashed,
           role: role || 'worker',
           isPhoneVerified: true,
+          name: name || '',
+          email: email || '',
+          city: city || '',
         },
         $setOnInsert: {
-          name: '',
-          email: '',
-          city: '',
+          phone,
           createdAt: new Date(),
           safetyIncidents: 0,
           lastSafetyIncidentDate: null,
@@ -1617,48 +1628,8 @@ app.post('/api/set-password', async (req, res) => {
 
     res.json({ message: 'Signup complete' });
   } catch (err) {
+    console.error('set-password error:', err);
     res.status(500).json({ error: 'Failed to set password' });
-  }
-});
-
-app.post('/api/send-emergency-otp', async (req, res) => {
-  try {
-    const { workerPhone, emergencyPhone } = req.body || {};
-
-    if (!workerPhone || !emergencyPhone) {
-      return res.status(400).json({ error: 'Worker phone and emergency phone required' });
-    }
-
-    const worker = await workersCollection.findOne(getWorkerLookupFilter(workerPhone));
-    if (!worker) {
-      return res.status(404).json({ error: 'Worker not found' });
-    }
-
-    const otp = generateOtp();
-    const hashedOtp = await bcrypt.hash(otp, 10);
-    await tempOtpCollection.updateOne(
-      { phone: emergencyPhone },
-      {
-        $set: {
-          phone: emergencyPhone,
-          workerPhone,
-          otp: hashedOtp,
-          otpExpiry: Date.now() + 5 * 60 * 1000,
-          createdAt: new Date(),
-        },
-      },
-      { upsert: true }
-    );
-
-    const smsResult = await sendSafetySms(emergencyPhone, `Your OTP is ${otp}`);
-    if (!smsResult.sent) {
-      return res.status(500).json({ error: 'Failed to send OTP', reason: smsResult.reason });
-    }
-
-    res.json({ message: 'Emergency contact OTP sent' });
-  } catch (err) {
-    console.error('send-emergency-otp error:', err);
-    res.status(500).json({ error: 'Failed to send emergency OTP' });
   }
 });
 
@@ -1922,15 +1893,17 @@ console.log("ML Features:", mlFeatures);
 
 app.get('/api/workers/by-phone/:phone', async (req, res) => {
   try {
-    const { phone } = req.params;
+   const { phone } = req.params;
+    const digitsOnly = phone.replace(/\D/g, '');
+    const last10 = digitsOnly.slice(-10);
 
     const worker = await workersCollection.findOne({
-  $or: [
-    { phone: phone },
-    { emergencyContact: phone },
-    { 'safety.emergencyContact': phone },
-  ],
-});
+      $or: [
+        { phone: { $regex: last10 + '$' } },
+        { emergencyContact: { $regex: last10 + '$' } },
+        { 'safety.emergencyContact': { $regex: last10 + '$' } },
+      ],
+    });
 
     if (!worker) {
       return res.status(404).json({ message: 'Worker not found' });

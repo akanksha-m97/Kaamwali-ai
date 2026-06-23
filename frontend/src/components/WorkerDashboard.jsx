@@ -458,9 +458,9 @@ const WorkerDashboard = () => {
 
 <div className="wd-preview-row">
   <div>
-    <div className="wd-preview-row-name">⭐ Trust Score</div>
+    <div className="wd-preview-row-name">✨ Quote of the day</div>
     <div className="wd-preview-row-meta">
-      {workerData?.trustScore || 0}/100
+      Your hard work today builds your trust tomorrow.
     </div>
   </div>
 </div>
