@@ -298,7 +298,8 @@ export function normalizeSkillCode(raw) {
   if (!cleaned) return '';
 
   if (SKILL_LOOKUP[cleaned]) return SKILL_LOOKUP[cleaned];
-
+  
+//partial matching like someone wrote kitchen cleaning services
   const matchedAlias = Object.keys(SKILL_LOOKUP)
     .sort((a, b) => b.length - a.length)
     .find((alias) => cleaned.includes(alias));
