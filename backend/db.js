@@ -8,7 +8,7 @@ const uri = process.env.MONGODB_URI;
 if (!uri) {
   throw new Error('MONGODB_URI is not defined. Check your environment variables.');
 }
-
+//These options configure the MongoDB server API version and make the connection behavior stricter and safer regarding deprecated features.
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
