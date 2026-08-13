@@ -1,3 +1,5 @@
+//not part of current implementation
+//used for early development or testing
 // backend/dataStore.js
 
 // In-memory arrays (reset on server restart)
