@@ -12,14 +12,14 @@ export async function hfSentiment(text) {
   const res = await fetch(HF_API_URL, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${HF_API_TOKEN}`,
-      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${HF_API_TOKEN}`, //Hugging Face ko prove karta hai ki request authorized hai.
+      'Content-Type': 'application/json',        //batata hai ki hum JSON data send kar rahe hain.
     },
     body: JSON.stringify({ inputs: text }),
   });
 
   if (!res.ok) {
-    console.error('HF API error', res.status);
+    console.error('HF API error', res.status);   // for example token invalid ,derver down of mmodel etc them fallback value will be returned
     return 0.5;
   }
 
