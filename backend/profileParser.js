@@ -15,7 +15,7 @@ export function getInitialOnboardingQueue() { // original array ki copy bnane k 
   return [...ONBOARDING_FIELD_ORDER];
 }
 
-export function advanceOnboardingQueue(queue, answeredField) {
+export function advanceOnboardingQueue(queue, answeredField) { This moves the onboarding process forward after a field is answered.
   const list = queue?.length ? queue : getInitialOnboardingQueue();
   const idx = list.indexOf(answeredField);
   if (idx === -1) return list.slice(1);
