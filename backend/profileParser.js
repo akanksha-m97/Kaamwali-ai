@@ -1,4 +1,4 @@
-export const ONBOARDING_FIELD_ORDER = [
+export const ONBOARDING_FIELD_ORDER = [ //This defines the order in which onboarding questions are asked.
   'cityArea',
   'age',
   'experienceYears',
