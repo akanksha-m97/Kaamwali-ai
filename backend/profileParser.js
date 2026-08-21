@@ -11,7 +11,7 @@ export const ONBOARDING_FIELD_ORDER = [ //This defines the order in which onboar
   'emergencyContact',
 ];
 
-export function getInitialOnboardingQueue() {
+export function getInitialOnboardingQueue() { // original array ki copy bnane k liye use hua hai
   return [...ONBOARDING_FIELD_ORDER];
 }
 
