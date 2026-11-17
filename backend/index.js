@@ -2950,7 +2950,8 @@ const PORT = process.env.PORT || 4000;
       await contactRequestsCollection.createIndex({ status: 1 });
     }
   } catch (err) {
-    console.error('MongoDB failed, using memory mode');
+    console.error('MongoDB connection failed!');
+  console.error('Actual error:', err);
     workersCollection = null;
     usersCollection = null;
     tempOtpCollection = null;
