@@ -6,7 +6,7 @@ export const API_BASE =
   import.meta.env.VITE_API_BASE ||
   localHosts.includes(window.location.hostname)
     ? "http://localhost:4000"
-    : "https://kaamwali-1.onrender.com";
+    : ""https://kaamwali-ai-ujix.onrender.com";
 
 export function resolveMediaUrl(url) {
   if (!url) return "";
