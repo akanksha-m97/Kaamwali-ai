@@ -3,10 +3,10 @@
 // Use Render backend URL in production, fallback to localhost for local dev
 const localHosts = ["localhost", "127.0.0.1", "::1"];
 export const API_BASE =
-  import.meta.env.VITE_API_BASE ||
-  localHosts.includes(window.location.hostname)
+ import.meta.env.VITE_API_BASE ||
+  (localHosts.includes(window.location.hostname)
     ? "http://localhost:4000"
-    : ""https://kaamwali-ai-ujix.onrender.com";
+    : "https://kaamwali-ai-ujix.onrender.com");
 
 export function resolveMediaUrl(url) {
   if (!url) return "";
