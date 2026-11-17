@@ -3,10 +3,14 @@ import { workerResumeTemplate } from './templates/workerResumeTemplate.js';
 //uploads/worker_123.pdf--output path
 export default async function generateWorkerPDF(worker, outputPath, language = 'en') {
   //puppeteer starts a browswer which is headless means not visible on screen
-  const browser = await puppeteer.launch({
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
-  });
+ const browser = await puppeteer.launch({
+  headless: true,
+  args: [
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage"
+  ]
+});
 //Browser
 // ↓
 //New Tab
@@ -15,8 +19,12 @@ export default async function generateWorkerPDF(worker, outputPath, language = '
   const html = workerResumeTemplate(worker, language);
 
   //loading generated html into puppeteer browser
-  await page.setContent(html, { waitUntil: "networkidle0" });
+  await page.setContent(html, {
+  waitUntil: "domcontentloaded",
+  timeout: 60000
+});
 
+await page.evaluate(() => document.fonts.ready);
   await page.pdf({
     path: outputPath,
     format: "A4",
